@@ -1,5 +1,7 @@
 package io.w8.game.core.world.player;
 
+import io.w8.game.core.world.rules.GameRules;
+
 public class Player {
     private static final float MOVE_SPEED = 220f;
 
@@ -22,7 +24,7 @@ public class Player {
         moving = true;
     }
 
-    public void update(float delta) {
+    public void update(float delta, GameRules rules) {
         if (!moving) return;
 
         float dx = targetX - x;
@@ -36,7 +38,7 @@ public class Player {
             return;
         }
 
-        float movement = Math.min(MOVE_SPEED * delta, distance);
+        float movement = Math.min(MOVE_SPEED * rules.getMovementSpeedMultiplier() * delta, distance);
         x += dx / distance * movement;
         y += dy / distance * movement;
     }
