@@ -18,6 +18,7 @@ import io.w8.game.core.world.render.WorldRenderer;
 import io.w8.game.core.ui.GameHud;
 import io.w8.game.core.world.time.GameTime;
 import io.w8.game.core.world.rules.GameRules;
+import io.w8.game.core.world.search.SearchSystem;
 
 public class GameScreen extends ScreenAdapter {
 
@@ -36,6 +37,7 @@ public class GameScreen extends ScreenAdapter {
     private final GameHud hud = new GameHud();
     private final GameTime gameTime = new GameTime();
     private final GameRules gameRules = new GameRules();
+    private final SearchSystem searchSystem = new SearchSystem();
     private boolean hudTouch;
 
     private float downX;
@@ -218,7 +220,7 @@ public class GameScreen extends ScreenAdapter {
         }
         shapes.end();
 
-        hud.render(player, world, gameTime);
+        hud.render(player, world, gameTime, searchSystem);
     }
 
     @Override
