@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Disposable;
 import io.w8.game.core.world.map.MapWorld;
 import io.w8.game.core.world.map.TileMap;
 import io.w8.game.core.world.player.Player;
+import io.w8.game.core.world.time.GameTime;
 
 public class GameHud implements Disposable {
     private final ShapeRenderer shapes = new ShapeRenderer();
@@ -30,7 +31,7 @@ public class GameHud implements Disposable {
         return y >= height - 94f || y <= 116f;
     }
 
-    public void render(Player player, MapWorld world) {
+    public void render(Player player, MapWorld world, GameTime gameTime) {
         if (width <= 0 || height <= 0) return;
 
         shapes.setProjectionMatrix(camera.combined);
@@ -64,7 +65,7 @@ public class GameHud implements Disposable {
         batch.begin();
         font.setColor(0.91f, 0.85f, 0.69f, 1f);
         font.getData().setScale(Math.max(1.45f, height / 440f));
-        font.draw(batch, "DAY 1  |  08:30", 20f, height - 36f);
+        font.draw(batch, gameTime.format(), 20f, height - 36f);
         font.draw(batch, "HEALTH 100%", width * 0.28f, height - 27f);
         font.draw(batch, "ENERGY 85%", width * 0.48f, height - 27f);
         font.draw(batch, "FOOD 12%", width * 0.68f, height - 27f);
