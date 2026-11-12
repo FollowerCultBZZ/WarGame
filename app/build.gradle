@@ -245,6 +245,5 @@ tasks.register('buildAssets') {
     group = 'assets'
     description = 'Process all game assets'
 
-    dependsOn 'splitTileset'
     dependsOn 'buildAtlases'
 }
