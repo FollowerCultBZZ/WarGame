@@ -57,7 +57,7 @@ public class WorldRenderer {
                         tileSize,
                         1f,
                         1f,
-                        90f
+                        -90f
                 );
             }
         }
