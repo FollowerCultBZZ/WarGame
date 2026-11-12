@@ -22,6 +22,7 @@ public class SearchSystem {
     private float elapsedGameSeconds;
     private float requiredGameSeconds;
     private String status = "Ready to search";
+    private int currentTerrainId;
 
     public SearchSystem() {
         tables = new JsonReader().parse(Gdx.files.internal("data/search_tables.json"));
@@ -40,6 +41,7 @@ public class SearchSystem {
             return;
         }
 
+        currentTerrainId = terrainId;
         results.clear();
         elapsedGameSeconds = 0f;
         requiredGameSeconds = BASE_SEARCH_TIME / rules.getSearchSpeedMultiplier();
@@ -50,17 +52,10 @@ public class SearchSystem {
     public void update(float delta, GameRules rules) {
         if (!searching || delta <= 0f) return;
 
-        elapsedGameSeconds += delta * 60f * rules.getSearchSpeedMultiplier();
+        elapsedGameSeconds += delta * 60f;
         if (elapsedGameSeconds >= requiredGameSeconds) {
-            finishSearch(terrainIdForCurrentSearch, rules);
+            finishSearch(currentTerrainId, rules);
         }
-    }
-
-    private int terrainIdForCurrentSearch;
-
-    public void start(int terrainId, GameRules rules, boolean ignored) {
-        terrainIdForCurrentSearch = terrainId;
-        start(terrainId, rules);
     }
 
     private void finishSearch(int terrainId, GameRules rules) {
