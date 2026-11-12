@@ -6,5 +6,7 @@ import io.w8.game.core.screens.GameScreen;
 public class Core extends Game {
 
     @Override
-    public void create() {}
+    public void create() {
+        setScreen(new GameScreen());
+    }
 }
