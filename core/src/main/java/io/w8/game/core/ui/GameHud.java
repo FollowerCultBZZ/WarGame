@@ -90,6 +90,13 @@ public class GameHud implements Disposable {
         if (player.isMoving()) {
             font.draw(batch, "MOVING", width - 100f, height - 88f);
         }
+        if (searchSystem.isSearching()) {
+            font.draw(batch, "SEARCHING  " + String.format(java.util.Locale.ROOT, "%.1f", searchSystem.getRemainingGameMinutes()) + " MIN",
+                    18f, height - 142f);
+        } else if (!searchSystem.getResultsText().isEmpty()) {
+            font.draw(batch, searchSystem.getStatus() + ": " + searchSystem.getResultsText(),
+                    18f, height - 142f);
+        }
         batch.end();
     }
 
