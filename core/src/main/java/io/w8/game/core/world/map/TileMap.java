@@ -70,7 +70,9 @@ public class TileMap {
 
             for (int y = 0; y < chunkSize; y++) {
                 for (int x = 0; x < chunkSize; x++) {
-                    int rgb = pixmap.getPixel(x, y) >>> 8;
+                    int sourceX = chunkSize - 1 - y;
+                    int sourceY = x;
+                    int rgb = pixmap.getPixel(sourceX, sourceY) >>> 8;
                     tiles[y * chunkSize + x] = (byte) getTerrainIdFromColor(
                             rgb,
                             chunkX * chunkSize + x,
