@@ -191,7 +191,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         float dt = Math.min(delta, 0.05f);
-        player.update(dt, world);
+        player.update(dt);
         cameraController.update(dt, player);
         Gdx.gl.glClearColor(0.07f, 0.09f, 0.08f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
