@@ -15,6 +15,7 @@ import io.w8.game.core.world.camera.CameraController;
 import io.w8.game.core.world.map.MapWorld;
 import io.w8.game.core.world.player.Player;
 import io.w8.game.core.world.render.WorldRenderer;
+import io.w8.game.core.ui.GameHud;
 
 public class GameScreen extends ScreenAdapter {
 
@@ -30,6 +31,8 @@ public class GameScreen extends ScreenAdapter {
     private final Player player = new Player(4096f, 4096f);
     private final CameraController cameraController = new CameraController(camera, world);
     private final WorldRenderer worldRenderer = new WorldRenderer(batch, atlas, world);
+    private final GameHud hud = new GameHud();
+    private boolean hudTouch;
 
     private float downX;
     private float downY;
@@ -52,10 +55,15 @@ public class GameScreen extends ScreenAdapter {
 
     public GameScreen() {
         cameraController.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cameraController.snapTo(player.getX(), player.getY());
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (pointer == 0 && hud.isHudTouch(screenY)) {
+                    hudTouch = true;
+                    return true;
+                }
                 if (pointer == 0) {
                     pointer0Down = true;
                     pointer0X = screenX;
@@ -80,6 +88,7 @@ public class GameScreen extends ScreenAdapter {
 
             @Override
             public boolean touchDragged(int screenX, int screenY, int pointer) {
+                if (hudTouch) return true;
                 if (pointer == 0) {
                     pointer0X = screenX;
                     pointer0Y = screenY;
@@ -123,6 +132,10 @@ public class GameScreen extends ScreenAdapter {
 
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                if (hudTouch) {
+                    hudTouch = false;
+                    return true;
+                }
                 if (pointer == 0) {
                     pointer0Down = false;
                 } else if (pointer == 1) {
@@ -199,16 +212,20 @@ public class GameScreen extends ScreenAdapter {
             shapes.circle(player.getTargetX(), player.getTargetY(), 12f, 20);
         }
         shapes.end();
+
+        hud.render(player, world);
     }
 
     @Override
     public void resize(int width, int height) {
         cameraController.resize(width, height);
+        hud.resize(width, height);
     }
 
     @Override
     public void dispose() {
         worldRenderer.dispose();
+        hud.dispose();
         atlas.dispose();
         batch.dispose();
         shapes.dispose();
