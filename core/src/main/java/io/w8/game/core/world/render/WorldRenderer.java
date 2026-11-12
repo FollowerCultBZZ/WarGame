@@ -47,7 +47,18 @@ public class WorldRenderer {
             for (int tileX = minX; tileX <= maxX; tileX++) {
                 Array<AtlasRegion> variants = variantsFor(world.getTerrainId(tileX, tileY));
                 int variant = Math.floorMod(hash(tileX, tileY), variants.size);
-                batch.draw(variants.get(variant), tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+                batch.draw(
+                        variants.get(variant),
+                        tileX * tileSize,
+                        tileY * tileSize,
+                        tileSize * 0.5f,
+                        tileSize * 0.5f,
+                        tileSize,
+                        tileSize,
+                        1f,
+                        1f,
+                        90f
+                );
             }
         }
         batch.end();
