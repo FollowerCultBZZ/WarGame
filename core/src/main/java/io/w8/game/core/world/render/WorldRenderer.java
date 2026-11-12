@@ -32,12 +32,14 @@ public class WorldRenderer {
 
     public void render(OrthographicCamera camera) {
         int tileSize = world.getTileSize();
-        int minX = Math.max(0, (int) Math.floor((camera.position.x - camera.viewportWidth * 0.5f) / tileSize));
-        int minY = Math.max(0, (int) Math.floor((camera.position.y - camera.viewportHeight * 0.5f) / tileSize));
+        float visibleWidth = camera.viewportWidth * camera.zoom;
+        float visibleHeight = camera.viewportHeight * camera.zoom;
+        int minX = Math.max(0, (int) Math.floor((camera.position.x - visibleWidth * 0.5f) / tileSize));
+        int minY = Math.max(0, (int) Math.floor((camera.position.y - visibleHeight * 0.5f) / tileSize));
         int maxX = Math.min(world.getTilesWide() - 1,
-                (int) Math.ceil((camera.position.x + camera.viewportWidth * 0.5f) / tileSize));
+                (int) Math.ceil((camera.position.x + visibleWidth * 0.5f) / tileSize));
         int maxY = Math.min(world.getTilesHigh() - 1,
-                (int) Math.ceil((camera.position.y + camera.viewportHeight * 0.5f) / tileSize));
+                (int) Math.ceil((camera.position.y + visibleHeight * 0.5f) / tileSize));
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
