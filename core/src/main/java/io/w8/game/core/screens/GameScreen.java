@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import io.w8.game.core.world.camera.CameraController;
 import io.w8.game.core.world.map.MapWorld;
@@ -83,7 +84,7 @@ public class GameScreen extends ScreenAdapter {
                     float dy = screenY - lastTapY;
                     if (lastTapTime != 0 && now - lastTapTime <= DOUBLE_TAP_TIME
                             && dx * dx + dy * dy <= DOUBLE_TAP_DISTANCE * DOUBLE_TAP_DISTANCE) {
-                        Vector2 destination = camera.unproject(new Vector2(screenX, screenY));
+                        Vector3 destination = camera.unproject(new Vector3(screenX, screenY, 0f));
                         player.moveTo(destination.x, destination.y);
                         cameraController.setFollowing(true);
                         lastTapTime = 0;
