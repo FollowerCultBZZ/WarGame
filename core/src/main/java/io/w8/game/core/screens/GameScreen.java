@@ -139,6 +139,9 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
                 if (hudTouch) {
+                    if (hud.isSearchButton(screenX, screenY) && !player.isMoving()) {
+                        searchSystem.start(world.getTerrainAt(player.getX(), player.getY()), gameRules);
+                    }
                     hudTouch = false;
                     return true;
                 }
@@ -165,7 +168,9 @@ public class GameScreen extends ScreenAdapter {
                     if (lastTapTime != 0 && now - lastTapTime <= DOUBLE_TAP_TIME
                             && dx * dx + dy * dy <= DOUBLE_TAP_DISTANCE * DOUBLE_TAP_DISTANCE) {
                         Vector3 destination = camera.unproject(new Vector3(screenX, screenY, 0f));
-                        player.moveTo(destination.x, destination.y);
+                        if (!searchSystem.isSearching()) {
+                            player.moveTo(destination.x, destination.y);
+                        }
                         cameraController.setFollowing(true);
                         lastTapTime = 0;
                     } else {
@@ -199,6 +204,7 @@ public class GameScreen extends ScreenAdapter {
         float dt = Math.min(delta, 0.05f);
         gameTime.update(dt);
         player.update(dt, gameRules);
+        searchSystem.update(dt, gameRules);
         cameraController.update(dt, player);
         Gdx.gl.glClearColor(0.07f, 0.09f, 0.08f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
