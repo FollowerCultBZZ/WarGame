@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import io.w8.game.core.world.camera.CameraController;
@@ -42,23 +41,70 @@ public class GameScreen extends ScreenAdapter {
     private float lastTapX;
     private float lastTapY;
 
+    private boolean pointer0Down;
+    private boolean pointer1Down;
+    private boolean pinching;
+    private float pointer0X;
+    private float pointer0Y;
+    private float pointer1X;
+    private float pointer1Y;
+    private float pinchDistance;
+
     public GameScreen() {
         cameraController.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cameraController.snapTo(player.getX(), player.getY());
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (pointer != 0) return false;
-                downX = lastX = screenX;
-                downY = lastY = screenY;
-                dragging = false;
-                moved = false;
-                return true;
+                if (pointer == 0) {
+                    pointer0Down = true;
+                    pointer0X = screenX;
+                    pointer0Y = screenY;
+                    downX = lastX = screenX;
+                    downY = lastY = screenY;
+                    dragging = false;
+                    moved = false;
+                } else if (pointer == 1) {
+                    pointer1Down = true;
+                    pointer1X = screenX;
+                    pointer1Y = screenY;
+                    if (pointer0Down) {
+                        pinching = true;
+                        lastTapTime = 0;
+                        cameraController.setFollowing(false);
+                        pinchDistance = distance(pointer0X, pointer0Y, pointer1X, pointer1Y);
+                    }
+                }
+                return pointer == 0 || pointer == 1;
             }
 
             @Override
             public boolean touchDragged(int screenX, int screenY, int pointer) {
+                if (pointer == 0) {
+                    pointer0X = screenX;
+                    pointer0Y = screenY;
+                } else if (pointer == 1) {
+                    pointer1X = screenX;
+                    pointer1Y = screenY;
+                } else {
+                    return false;
+                }
+
+                if (pointer0Down && pointer1Down) {
+                    float currentDistance = distance(pointer0X, pointer0Y, pointer1X, pointer1Y);
+                    if (pinchDistance > 0f && currentDistance > 0f) {
+                        cameraController.setZoom(
+                                cameraController.getZoom() * pinchDistance / currentDistance
+                        );
+                    }
+                    pinchDistance = currentDistance;
+                    pinching = true;
+                    cameraController.setFollowing(false);
+                    return true;
+                }
+
                 if (pointer != 0) return false;
+
                 float totalX = screenX - downX;
                 float totalY = screenY - downY;
                 if (!dragging && totalX * totalX + totalY * totalY > DRAG_THRESHOLD * DRAG_THRESHOLD) {
@@ -77,8 +123,23 @@ public class GameScreen extends ScreenAdapter {
 
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                if (pointer != 0) return false;
-                if (!dragging && !moved) {
+                if (pointer == 0) {
+                    pointer0Down = false;
+                } else if (pointer == 1) {
+                    pointer1Down = false;
+                } else {
+                    return false;
+                }
+
+                if (pinching) {
+                    if (!pointer0Down && !pointer1Down) {
+                        pinching = false;
+                        pinchDistance = 0f;
+                    }
+                    return true;
+                }
+
+                if (pointer == 0 && !dragging && !moved) {
                     long now = TimeUtils.millis();
                     float dx = screenX - lastTapX;
                     float dy = screenY - lastTapY;
@@ -106,6 +167,12 @@ public class GameScreen extends ScreenAdapter {
                 return false;
             }
         });
+    }
+
+    private float distance(float x1, float y1, float x2, float y2) {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     @Override
