@@ -10,6 +10,7 @@ import io.w8.game.core.world.map.MapWorld;
 import io.w8.game.core.world.map.TileMap;
 import io.w8.game.core.world.player.Player;
 import io.w8.game.core.world.time.GameTime;
+import io.w8.game.core.world.search.SearchSystem;
 
 public class GameHud implements Disposable {
     private final ShapeRenderer shapes = new ShapeRenderer();
@@ -31,7 +32,13 @@ public class GameHud implements Disposable {
         return y >= height - 94f || y <= 116f;
     }
 
-    public void render(Player player, MapWorld world, GameTime gameTime) {
+    public boolean isSearchButton(int screenX, int screenY) {
+        float y = height - screenY;
+        return screenX >= width * 0.5f && screenX < width * 0.75f
+                && y >= 0f && y <= 112f;
+    }
+
+    public void render(Player player, MapWorld world, GameTime gameTime, SearchSystem searchSystem) {
         if (width <= 0 || height <= 0) return;
 
         shapes.setProjectionMatrix(camera.combined);
