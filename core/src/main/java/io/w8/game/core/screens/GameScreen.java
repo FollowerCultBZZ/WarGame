@@ -16,6 +16,7 @@ import io.w8.game.core.world.map.MapWorld;
 import io.w8.game.core.world.player.Player;
 import io.w8.game.core.world.render.WorldRenderer;
 import io.w8.game.core.ui.GameHud;
+import io.w8.game.core.world.time.GameTime;
 
 public class GameScreen extends ScreenAdapter {
 
@@ -32,6 +33,7 @@ public class GameScreen extends ScreenAdapter {
     private final CameraController cameraController = new CameraController(camera, world);
     private final WorldRenderer worldRenderer = new WorldRenderer(batch, atlas, world);
     private final GameHud hud = new GameHud();
+    private final GameTime gameTime = new GameTime();
     private boolean hudTouch;
 
     private float downX;
@@ -191,6 +193,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         float dt = Math.min(delta, 0.05f);
+        gameTime.update(dt);
         player.update(dt);
         cameraController.update(dt, player);
         Gdx.gl.glClearColor(0.07f, 0.09f, 0.08f, 1f);
@@ -213,7 +216,7 @@ public class GameScreen extends ScreenAdapter {
         }
         shapes.end();
 
-        hud.render(player, world);
+        hud.render(player, world, gameTime);
     }
 
     @Override
