@@ -6,24 +6,27 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import io.w8.game.core.world.map.MapWorld;
+import io.w8.game.core.world.map.TileMap;
 
 public class WorldRenderer {
 
     private final SpriteBatch batch;
     private final MapWorld world;
     private final Array<AtlasRegion> forest;
-    private final Array<AtlasRegion> grass;
+    private final Array<AtlasRegion> wasteland;
     private final Array<AtlasRegion> water;
 
     public WorldRenderer(SpriteBatch batch, TextureAtlas atlas, MapWorld world) {
         this.batch = batch;
         this.world = world;
         forest = atlas.findRegions("forest");
-        grass = atlas.findRegions("grass");
+        wasteland = atlas.findRegions("grass");
         water = atlas.findRegions("water");
 
-        if (forest.size == 0 || grass.size == 0 || water.size == 0) {
-            throw new IllegalStateException("Atlas must contain forest, grass and water regions");
+        if (forest.size == 0 || wasteland.size == 0 || water.size == 0) {
+            throw new IllegalStateException(
+                    "Atlas must contain forest, grass (wasteland) and water regions"
+            );
         }
     }
 
@@ -49,9 +52,9 @@ public class WorldRenderer {
     }
 
     private Array<AtlasRegion> variantsFor(int terrainId) {
-        if (terrainId == 1) return forest;
-        if (terrainId == 3) return water;
-        return grass;
+        if (terrainId == TileMap.FOREST) return forest;
+        if (terrainId == TileMap.WATER) return water;
+        return wasteland;
     }
 
     private int hash(int x, int y) {
