@@ -91,7 +91,7 @@ tasks.register('buildAtlases', JavaExec) {
 
         outputDir.mkdirs()
 
-        delete(fileTree(outputDir) {
+        project.delete(project.fileTree(outputDir) {
             include 'game.atlas', 'game*.png'
         })
 
