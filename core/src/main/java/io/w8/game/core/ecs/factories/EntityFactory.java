@@ -27,7 +27,7 @@ public class EntityFactory {
 
         ShapeComponent shape = new ShapeComponent();
         shape.type = ShapeComponent.TRIANGLE;
-        shape.radius = 24f;
+        shape.radius = 28f;
         shape.red = 0.2f;
         shape.green = 0.85f;
         shape.blue = 1f;
