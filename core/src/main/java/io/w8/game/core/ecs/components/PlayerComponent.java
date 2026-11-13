@@ -14,6 +14,8 @@ public class PlayerComponent implements Component {
     public int piercingLevels;
     public float fireRateMultiplier = 1f;
     public float rocketFireRateMultiplier = 1f;
+    public float fireRateOverdriveTimer;
+    public float multiShotOverdriveTimer;
     public float speedMultiplier = 1f;
     public float rocketTimer = 1.2f;
     public float ultimateCooldown;
