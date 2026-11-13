@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.ecs.components.EffectComponent;
+import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.PickupComponent;
 import io.w8.game.core.ecs.components.ShapeComponent;
@@ -24,6 +25,7 @@ public class RenderSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> effects;
+    private ImmutableArray<Entity> enemies;
 
     public RenderSystem(OrthographicCamera camera, Arena arena) {
         this.camera = camera;
@@ -35,6 +37,7 @@ public class RenderSystem extends EntitySystem {
         entities = engine.getEntitiesFor(Family.all(TransformComponent.class, ShapeComponent.class).get());
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
         effects = engine.getEntitiesFor(Family.all(EffectComponent.class, TransformComponent.class).get());
+        enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class).get());
     }
 
     public void render() {
@@ -126,6 +129,19 @@ public class RenderSystem extends EntitySystem {
                     ratio > 0.55f ? 0.35f : 0.12f, 1f);
             renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, height - 4f);
         }
+
+        for (int i = 0; i < enemies.size(); i++) {
+            EnemyComponent enemy = enemies.get(i).getComponent(EnemyComponent.class);
+            if (enemy.kind != 3) continue;
+            float ratio = Math.max(0f, Math.min(1f, enemy.health / enemy.maxHealth));
+            float x = arena.getWidth() * 0.18f;
+            float y = arena.getHeight() - 70f;
+            float width = arena.getWidth() * 0.64f;
+            renderer.setColor(0.12f, 0.04f, 0.06f, 1f);
+            renderer.rect(x, y, width, 18f);
+            renderer.setColor(0.95f, 0.08f, 0.16f, 1f);
+            renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, 14f);
+        }
         renderer.end();
 
         batch.setProjectionMatrix(camera.combined);
@@ -152,6 +168,13 @@ public class RenderSystem extends EntitySystem {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
             font.getData().setScale(1.35f);
             font.draw(batch, "SCORE " + player.score, arena.getWidth() - 175f, arena.getHeight() - 22f);
+            if (player.dead) {
+                font.getData().setScale(3.2f);
+                font.draw(batch, "GAME OVER", arena.getWidth() * 0.5f - 100f, arena.getHeight() * 0.5f + 18f);
+                font.getData().setScale(1.5f);
+                font.draw(batch, "FINAL SCORE " + player.score, arena.getWidth() * 0.5f - 95f,
+                        arena.getHeight() * 0.5f - 25f);
+            }
         }
         batch.end();
     }
