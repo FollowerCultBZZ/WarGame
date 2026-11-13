@@ -27,7 +27,7 @@ public class PickupSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        for (int i = 0; i < pickups.size(); i++) {
+        for (int i = pickups.size() - 1; i >= 0; i--) {
             Entity pickup = pickups.get(i);
             if (pickup.getComponent(TransformComponent.class).y < -30f) {
                 engine.removeEntity(pickup);
@@ -37,49 +37,60 @@ public class PickupSystem extends EntitySystem {
         for (int i = 0; i < players.size(); i++) {
             Entity playerEntity = players.get(i);
             PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
-            TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
-            VelocityComponent velocity = playerEntity.getComponent(VelocityComponent.class);
+            if (player.dead) continue;
 
-            for (int j = 0; j < pickups.size(); j++) {
+            TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
+
+            for (int j = pickups.size() - 1; j >= 0; j--) {
                 Entity pickupEntity = pickups.get(j);
-                if (pickupEntity.getComponent(PickupComponent.class) == null) continue;
+                PickupComponent pickup = pickupEntity.getComponent(PickupComponent.class);
+                if (pickup == null) continue;
+
                 TransformComponent pickupTransform = pickupEntity.getComponent(TransformComponent.class);
                 float dx = playerTransform.x - pickupTransform.x;
                 float dy = playerTransform.y - pickupTransform.y;
                 if (dx * dx + dy * dy > 39f * 39f) continue;
 
-                int type = pickupEntity.getComponent(PickupComponent.class).type;
-                player.score += 25;
-                if (type == PickupComponent.SPEED) {
-                    player.speedMultiplier = Math.min(2.15f, player.speedMultiplier + 0.15f);
-                    velocity.maxSpeed = Math.min(1050f, velocity.maxSpeed + 35f);
-                } else if (type == PickupComponent.MULTI_SHOT) {
-                    if (player.extraProjectiles < 5) {
-                        player.extraProjectiles++;
-                    } else {
-                        player.multiShotOverdriveTimer = 8f;
-                    }
-                } else if (type == PickupComponent.FIRE_RATE) {
-                    if (player.fireRateMultiplier < 2.5f) {
-                        player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
-                    } else {
-                        player.fireRateOverdriveTimer = 8f;
-                    }
-                } else if (type == PickupComponent.HEAL) {
-                    player.health = Math.min(player.maxHealth, player.health + 28f);
-                } else if (type == PickupComponent.HOMING) {
-                    if (player.rocketCount < 4) {
-                        player.rocketCount++;
-                    } else {
-                        player.rocketFireRateMultiplier = Math.min(2.25f,
-                                player.rocketFireRateMultiplier + 0.25f);
-                        player.rocketTimer = Math.min(player.rocketTimer,
-                                Math.max(0.32f, 2.8f / player.rocketFireRateMultiplier));
-                    }
-                    player.homingLevels = Math.min(4, player.homingLevels + 1);
-                } else if (type == PickupComponent.PIERCING) {
-                    player.piercingLevels = Math.min(3, player.piercingLevels + 1);
+                switch (pickup.type) {
+                    case PickupComponent.SPEED:
+                        player.speedMultiplier = Math.min(2.15f, player.speedMultiplier + 0.15f);
+                        break;
+                    case PickupComponent.MULTI_SHOT:
+                        if (player.extraProjectiles < 5) {
+                            player.extraProjectiles++;
+                        } else {
+                            player.multiShotOverdriveTimer = 8f;
+                        }
+                        break;
+                    case PickupComponent.FIRE_RATE:
+                        if (player.fireRateMultiplier < 2.5f) {
+                            player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
+                        } else {
+                            player.fireRateOverdriveTimer = 8f;
+                        }
+                        break;
+                    case PickupComponent.HEAL:
+                        player.health = Math.min(player.maxHealth, player.health + 28f);
+                        break;
+                    case PickupComponent.HOMING:
+                        if (player.rocketCount < 4) {
+                            player.rocketCount++;
+                        } else {
+                            player.rocketFireRateMultiplier = Math.min(2.25f,
+                                    player.rocketFireRateMultiplier + 0.25f);
+                            player.rocketTimer = Math.min(player.rocketTimer,
+                                    Math.max(0.32f, 2.8f / player.rocketFireRateMultiplier));
+                        }
+                        player.homingLevels = Math.min(4, player.homingLevels + 1);
+                        break;
+                    case PickupComponent.PIERCING:
+                        player.piercingLevels = Math.min(3, player.piercingLevels + 1);
+                        break;
+                    default:
+                        continue;
                 }
+
+                player.score += 25;
                 factory.createEffect(pickupTransform.x, pickupTransform.y, 0.3f, 1f, 0.8f, 24f);
                 engine.removeEntity(pickupEntity);
             }
