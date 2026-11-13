@@ -33,6 +33,7 @@ public class WeaponSystem extends EntitySystem {
             TransformComponent transform = player.getComponent(TransformComponent.class);
             PlayerComponent stats = player.getComponent(PlayerComponent.class);
             WeaponComponent weapon = player.getComponent(WeaponComponent.class);
+            if (stats.dead) continue;
 
             weapon.fireTimer -= delta;
             if (weapon.fireTimer <= 0f) {
