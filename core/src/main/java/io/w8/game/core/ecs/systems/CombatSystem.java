@@ -32,6 +32,7 @@ public class CombatSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        if (players.size() == 0 || players.first().getComponent(PlayerComponent.class).dead) return;
         remove.clear();
 
         for (int i = 0; i < projectiles.size(); i++) {
@@ -48,10 +49,11 @@ public class CombatSystem extends EntitySystem {
                     float dy = shotTransform.y - playerTransform.y;
                     if (dx * dx + dy * dy <= 28f * 28f) {
                         PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
-                        if (player.damageCooldown <= 0f) {
+                        if (player.damageCooldown <= 0f && !player.dead) {
                             player.health = Math.max(0f, player.health - projectile.damage);
                             player.damageCooldown = 0.35f;
                             factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.2f, 0.12f, 26f);
+                            if (player.health <= 0f) player.dead = true;
                         }
                         remove.add(shot);
                         break;
@@ -85,11 +87,15 @@ public class CombatSystem extends EntitySystem {
                             remove.add(affected);
                             if (players.size() > 0) {
                                 PlayerComponent scorer = players.first().getComponent(PlayerComponent.class);
-                                scorer.score += affectedEnemy.kind == 1 ? 400 : affectedEnemy.kind == 0 ? 275 : 200;
+                                scorer.score += affectedEnemy.kind == 3 ? 2500
+                                        : affectedEnemy.kind == 1 ? 400
+                                        : affectedEnemy.kind == 0 ? 275 : 200;
                             }
                             factory.createEffect(affectedTransform.x, affectedTransform.y,
-                                    1f, 0.25f, 0.18f, affectedEnemy.radius * 1.8f);
-                            if (MathUtils.randomBoolean(0.42f)) {
+                                    affectedEnemy.kind == 3 ? 1f : 1f,
+                                    affectedEnemy.kind == 3 ? 0.12f : 0.25f,
+                                    0.18f, affectedEnemy.radius * (affectedEnemy.kind == 3 ? 2.5f : 1.8f));
+                            if (affectedEnemy.kind != 3 && MathUtils.randomBoolean(0.42f)) {
                                 factory.createPickup(affectedTransform.x, affectedTransform.y,
                                         MathUtils.random(0, 5));
                             }
@@ -109,6 +115,7 @@ public class CombatSystem extends EntitySystem {
             PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
             TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
             player.damageCooldown = Math.max(0f, player.damageCooldown - deltaTime);
+            if (player.dead) continue;
 
             for (int j = 0; j < enemies.size(); j++) {
                 Entity enemyEntity = enemies.get(j);
@@ -123,10 +130,13 @@ public class CombatSystem extends EntitySystem {
                     player.damageCooldown = 0.65f;
                     enemy.health -= 1f;
                     factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.15f, 0.12f, 30f);
+                    if (player.health <= 0f) player.dead = true;
                     if (enemy.health <= 0f) {
                         remove.add(enemyEntity);
-                        player.score += enemy.kind == 1 ? 400 : enemy.kind == 0 ? 275 : 200;
-                        factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.3f, 0.12f, enemy.radius * 1.6f);
+                        player.score += enemy.kind == 3 ? 2500
+                                : enemy.kind == 1 ? 400 : enemy.kind == 0 ? 275 : 200;
+                        factory.createEffect(enemyTransform.x, enemyTransform.y,
+                                1f, 0.3f, 0.12f, enemy.radius * 1.6f);
                     }
                     break;
                 }
