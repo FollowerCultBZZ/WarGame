@@ -9,10 +9,13 @@ import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.ecs.components.WeaponComponent;
 import io.w8.game.core.ecs.factories.EntityFactory;
+import io.w8.game.core.ecs.effects.ParticleEffectFactory;
+import io.w8.game.core.ecs.components.VelocityComponent;
 
 public class WeaponSystem extends EntitySystem {
     private final Engine engine;
     private EntityFactory factory;
+    private ParticleEffectFactory effects;
     private ImmutableArray<Entity> players;
 
     public WeaponSystem(Engine engine) {
@@ -22,6 +25,7 @@ public class WeaponSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         factory = new EntityFactory(engine);
+        effects = new ParticleEffectFactory(engine);
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, WeaponComponent.class).get());
     }
 
@@ -48,6 +52,8 @@ public class WeaponSystem extends EntitySystem {
                     float offset = (shot - (count - 1) * 0.5f) * 13f;
                     factory.createProjectile(transform.x, transform.y + 32f, offset,
                             weapon.projectileSpeed, false, stats.piercingLevels);
+                    effects.createShotSparks(transform.x + offset, transform.y + 32f,
+                            offset * 2.5f, weapon.projectileSpeed);
                 }
             }
 
