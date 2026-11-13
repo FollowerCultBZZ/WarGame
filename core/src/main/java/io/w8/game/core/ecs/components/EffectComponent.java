@@ -9,6 +9,12 @@ public class EffectComponent implements Component {
     public float startRed = 1f;
     public float startGreen = 0.94f;
     public float startBlue = 0.12f;
+    public float middleRed = 1f;
+    public float middleGreen = 0.34f;
+    public float middleBlue = 0.035f;
+    public float endRed = 0.42f;
+    public float endGreen = 0.45f;
+    public float endBlue = 0.48f;
     public final Array<Particle> particles = new Array<>();
 
     public static class Particle {
