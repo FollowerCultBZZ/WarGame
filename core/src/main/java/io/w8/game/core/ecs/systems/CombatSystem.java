@@ -106,8 +106,14 @@ public class CombatSystem extends EntitySystem {
                                     1f, affectedEnemy.kind == 3 ? 0.12f : 0.25f,
                                     0.18f, affectedEnemy.radius * (affectedEnemy.kind == 3 ? 2.5f : 1.8f));
                             if (affectedEnemy.kind != 3 && MathUtils.randomBoolean(0.42f)) {
+                                int[] pickupTypes = {
+                                        io.w8.game.core.ecs.components.PickupComponent.HEAL,
+                                        io.w8.game.core.ecs.components.PickupComponent.HOMING,
+                                        io.w8.game.core.ecs.components.PickupComponent.FIRE_RATE,
+                                        io.w8.game.core.ecs.components.PickupComponent.MULTI_SHOT
+                                };
                                 factory.createPickup(affectedTransform.x, affectedTransform.y,
-                                        MathUtils.random(0, 5));
+                                        pickupTypes[MathUtils.random(pickupTypes.length - 1)]);
                             }
                         }
                     }
