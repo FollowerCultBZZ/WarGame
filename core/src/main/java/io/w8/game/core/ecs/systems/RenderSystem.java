@@ -183,6 +183,18 @@ public class RenderSystem extends EntitySystem {
                 font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
                         20f, arena.getHeight() - 82f);
             }
+            if (player.fireRateOverdriveTimer > 0f) {
+                font.draw(batch, "FIRE RATE x2.5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
+                        20f, arena.getHeight() - 106f);
+            }
+            if (player.multiShotOverdriveTimer > 0f) {
+                font.draw(batch, "DOUBLE SHOTS  " + (int) Math.ceil(player.multiShotOverdriveTimer) + "s",
+                        20f, arena.getHeight() - 130f);
+            }
+            if (player.homingLevels > 0) {
+                font.draw(batch, "ROCKET RATE x" + String.format(java.util.Locale.US, "%.2f",
+                        player.rocketFireRateMultiplier), 20f, arena.getHeight() - 154f);
+            }
             if (player.dead) {
                 font.getData().setScale(3.2f);
                 font.draw(batch, "GAME OVER", arena.getWidth() * 0.5f - 100f, arena.getHeight() * 0.5f + 18f);
@@ -195,7 +207,7 @@ public class RenderSystem extends EntitySystem {
             EnemyComponent enemy = enemies.get(i).getComponent(EnemyComponent.class);
             if (enemy.kind == 3) {
                 font.getData().setScale(1.1f);
-                font.draw(batch, "BOSS  STAGE " + enemy.bossStage,
+                font.draw(batch, "BOSS " + enemy.bossNumber + "  STAGE " + enemy.bossStage,
                         arena.getWidth() * 0.18f, arena.getHeight() - 47f);
             }
         }
