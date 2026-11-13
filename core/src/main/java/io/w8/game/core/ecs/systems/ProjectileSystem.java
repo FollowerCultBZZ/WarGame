@@ -8,11 +8,14 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
 import io.w8.game.core.ecs.components.ProjectileComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
+import io.w8.game.core.ecs.components.VelocityComponent;
+import io.w8.game.core.ecs.effects.ParticleEffectFactory;
 import io.w8.game.core.world.Arena;
 
 public class ProjectileSystem extends EntitySystem {
     private final Arena arena;
     private Engine engine;
+    private ParticleEffectFactory effects;
     private ImmutableArray<Entity> projectiles;
     private final Array<Entity> expired = new Array<>();
 
@@ -23,6 +26,7 @@ public class ProjectileSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         this.engine = engine;
+        effects = new ParticleEffectFactory(engine);
         projectiles = engine.getEntitiesFor(Family.all(ProjectileComponent.class, TransformComponent.class).get());
     }
 
@@ -35,6 +39,14 @@ public class ProjectileSystem extends EntitySystem {
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             projectile.remainingLife -= delta;
+            if (projectile.rocket && !projectile.enemyOwned) {
+                projectile.trailTimer -= delta;
+                if (projectile.trailTimer <= 0f) {
+                    VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
+                    effects.createRocketTrail(transform.x, transform.y, velocity.x, velocity.y);
+                    projectile.trailTimer = 0.035f;
+                }
+            }
             if (projectile.remainingLife <= 0f
                     || transform.y > arena.getHeight() + 60f
                     || transform.x < -60f
