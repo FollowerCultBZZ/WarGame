@@ -94,9 +94,13 @@ public class RenderSystem extends EntitySystem {
                 " vec3 color=tex.rgb*tint*(0.82+wave*0.28+sweep*0.42);\n" +
                 " gl_FragColor=vec4(color,tex.a*v_color.a*0.84);\n" +
                 "}";
-        shieldShader = new ShaderProgram(vertexShader, fragmentShader);
-        if (!shieldShader.isCompiled()) {
-            throw new IllegalStateException("Shield shader compilation failed: " + shieldShader.getLog());
+        ShaderProgram compiledShieldShader = new ShaderProgram(vertexShader, fragmentShader);
+        if (compiledShieldShader.isCompiled()) {
+            shieldShader = compiledShieldShader;
+        } else {
+            Gdx.app.error("RenderSystem", "Shield shader compilation failed: " + compiledShieldShader.getLog());
+            compiledShieldShader.dispose();
+            shieldShader = null;
         }
 
         Array<TextureRegion> fireFrames = new Array<>();
@@ -191,7 +195,7 @@ public class RenderSystem extends EntitySystem {
         if (players.size() > 0) {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
             float ratio = Math.max(0f, Math.min(1f, player.health / player.maxHealth));
-            float x = 32f;
+            float x = 44f;
             float y = arena.getHeight() - 52f;
             float width = 190f;
             float height = 13f;
@@ -242,11 +246,14 @@ public class RenderSystem extends EntitySystem {
             drawCentered(playerRegion, transform.x, transform.y,
                     playerWidth, playerHeight, rotation);
 
-            if (player.invulnerabilityTimer > 0f) {
-                batch.setShader(shieldShader);
-                shieldShader.setUniformf("u_time", animationTime);
+            if (player.invulnerabilityTimer > 0f && shieldRegion != null) {
+                if (shieldShader != null) {
+                    batch.setShader(shieldShader);
+                    shieldShader.bind();
+                    shieldShader.setUniformf("u_time", animationTime);
+                }
                 drawCentered(shieldRegion, transform.x, transform.y, 88f, 88f, rotation);
-                batch.setShader(null);
+                if (shieldShader != null) batch.setShader(null);
             }
         }
 
@@ -285,15 +292,15 @@ public class RenderSystem extends EntitySystem {
             layout.setText(font, scoreText);
             font.draw(batch, scoreText, arena.getWidth() - layout.width - 32f,
                     arena.getHeight() - 38f);
-            font.draw(batch, "LIVES " + player.lives, 32f, arena.getHeight() - 82f);
+            font.draw(batch, "LIVES " + player.lives, 44f, arena.getHeight() - 82f);
             float statusY = arena.getHeight() - 116f;
             if (player.invulnerabilityTimer > 0f) {
                 font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
-                        32f, statusY);
+                        44f, statusY);
                 statusY -= 30f;
             }
             if (player.fireRateOverdriveTimer > 0f) {
-                font.draw(batch, "FIRE RATE x5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
+                font.draw(batch, "FIRE RATE OVERDRIVE x3.5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
                         32f, statusY);
                 statusY -= 30f;
             }
@@ -304,7 +311,7 @@ public class RenderSystem extends EntitySystem {
             }
             if (player.homingLevels > 0) {
                 font.draw(batch, "ROCKET RATE x" + String.format(java.util.Locale.US, "%.2f",
-                        player.rocketFireRateMultiplier), 32f, statusY);
+                        player.rocketFireRateMultiplier), 44f, statusY);
             }
             if (player.dead) {
                 font.getData().setScale(3f);
@@ -364,7 +371,7 @@ public class RenderSystem extends EntitySystem {
     public void dispose() {
         atlas.dispose();
         backgroundTexture.dispose();
-        shieldShader.dispose();
+        if (shieldShader != null) shieldShader.dispose();
         renderer.dispose();
         batch.dispose();
         font.dispose();
