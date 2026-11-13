@@ -22,8 +22,8 @@ public class EntityFactory {
     public Entity createPlayer(float x, float y) {
         Entity entity = engine.createEntity();
         VelocityComponent velocity = new VelocityComponent();
-        velocity.maxSpeed = 840f;
-        velocity.acceleration = 5200f;
+        velocity.maxSpeed = 920f;
+        velocity.acceleration = 8200f;
 
         ShapeComponent shape = new ShapeComponent();
         shape.type = ShapeComponent.TRIANGLE;
@@ -48,35 +48,35 @@ public class EntityFactory {
         ShapeComponent shape = new ShapeComponent();
 
         if (kind == 0) {
-            enemy.health = 6f + difficulty * 1.25f;
-            enemy.speed = 42f + difficulty * 1.2f;
-            enemy.contactDamage = 18f + difficulty * 0.5f;
-            enemy.radius = 21f;
-            enemy.fireInterval = Math.max(0.72f, 1.55f - difficulty * 0.035f);
+            enemy.health = 10f + difficulty * 2.0f;
+            enemy.speed = 58f + difficulty * 2.2f;
+            enemy.contactDamage = 24f + difficulty * 1.0f;
+            enemy.radius = 23f;
+            enemy.fireInterval = Math.max(0.48f, 1.35f - difficulty * 0.045f);
             shape.type = ShapeComponent.CIRCLE;
-            shape.radius = 21f;
+            shape.radius = 23f;
             shape.red = 0.35f;
             shape.green = 0.72f;
             shape.blue = 1f;
         } else if (kind == 1) {
-            enemy.health = 14f + difficulty * 2.1f;
-            enemy.speed = 92f + difficulty * 3.2f;
-            enemy.contactDamage = 32f + difficulty * 1.1f;
-            enemy.radius = 29f;
+            enemy.health = 24f + difficulty * 3.4f;
+            enemy.speed = 118f + difficulty * 4.8f;
+            enemy.contactDamage = 42f + difficulty * 1.8f;
+            enemy.radius = 31f;
             enemy.fireInterval = 999f;
             shape.type = ShapeComponent.RECTANGLE;
-            shape.radius = 29f;
+            shape.radius = 31f;
             shape.red = 0.72f;
             shape.green = 0.24f;
             shape.blue = 0.18f;
         } else {
-            enemy.health = 3.5f + difficulty * 0.8f;
-            enemy.speed = 190f + difficulty * 6f;
-            enemy.contactDamage = 14f + difficulty * 0.45f;
-            enemy.radius = 16f;
+            enemy.health = 7f + difficulty * 1.25f;
+            enemy.speed = 235f + difficulty * 9f;
+            enemy.contactDamage = 20f + difficulty * 0.9f;
+            enemy.radius = 17f;
             enemy.fireInterval = 999f;
             shape.type = ShapeComponent.TRIANGLE;
-            shape.radius = 16f;
+            shape.radius = 17f;
             shape.red = 1f;
             shape.green = 0.62f;
             shape.blue = 0.16f;
