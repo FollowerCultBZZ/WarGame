@@ -68,8 +68,8 @@ public class PickupSystem extends EntitySystem {
                         }
                         break;
                     case PickupComponent.FIRE_RATE:
-                        if (player.fireRateMultiplier < 3.0f) {
-                            player.fireRateMultiplier = Math.min(3.0f, player.fireRateMultiplier + 0.25f);
+                        if (player.fireRateMultiplier < 3.5f) {
+                            player.fireRateMultiplier = Math.min(3.5f, player.fireRateMultiplier + 0.35f);
                         } else {
                             player.fireRateOverdriveTimer = 8f;
                         }
