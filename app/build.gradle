@@ -91,16 +91,28 @@ tasks.register('buildAtlases', JavaExec) {
 
         outputDir.mkdirs()
 
+        delete(fileTree(outputDir) {
+            include 'game.atlas', 'game*.png'
+        })
+
         args = [
-            '--filter', 'Nearest,Nearest',
-            '--useIndexes',
-            '--paddingX', '2',
-            '--paddingY', '2',
-            '--duplicatePadding',
             inputDir.absolutePath,
             outputDir.absolutePath,
             'game'
         ]
+    }
+
+    doLast {
+        def atlasFile = new File(outputDir, 'game.atlas')
+        def pageFile = new File(outputDir, 'game.png')
+
+        if (!atlasFile.isFile() || !pageFile.isFile()) {
+            throw new GradleException(
+                "TexturePacker did not generate game.atlas and game.png in ${outputDir}. Check app/assets/sprites and pack.json."
+            )
+        }
+
+        logger.lifecycle("Texture atlas generated: ${atlasFile}")
     }
 }
 
