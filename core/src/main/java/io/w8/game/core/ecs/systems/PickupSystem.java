@@ -54,9 +54,17 @@ public class PickupSystem extends EntitySystem {
                     player.speedMultiplier = Math.min(2.15f, player.speedMultiplier + 0.15f);
                     velocity.maxSpeed = Math.min(1050f, velocity.maxSpeed + 35f);
                 } else if (type == PickupComponent.MULTI_SHOT) {
-                    player.extraProjectiles = Math.min(5, player.extraProjectiles + 1);
+                    if (player.extraProjectiles < 5) {
+                        player.extraProjectiles++;
+                    } else {
+                        player.multiShotOverdriveTimer = 8f;
+                    }
                 } else if (type == PickupComponent.FIRE_RATE) {
-                    player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
+                    if (player.fireRateMultiplier < 2.5f) {
+                        player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
+                    } else {
+                        player.fireRateOverdriveTimer = 8f;
+                    }
                 } else if (type == PickupComponent.HEAL) {
                     player.health = Math.min(player.maxHealth, player.health + 28f);
                 } else if (type == PickupComponent.HOMING) {
@@ -65,6 +73,8 @@ public class PickupSystem extends EntitySystem {
                     } else {
                         player.rocketFireRateMultiplier = Math.min(2.25f,
                                 player.rocketFireRateMultiplier + 0.25f);
+                        player.rocketTimer = Math.min(player.rocketTimer,
+                                Math.max(0.32f, 2.8f / player.rocketFireRateMultiplier));
                     }
                     player.homingLevels = Math.min(4, player.homingLevels + 1);
                 } else if (type == PickupComponent.PIERCING) {
