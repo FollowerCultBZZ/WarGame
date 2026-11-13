@@ -8,9 +8,12 @@ public class PlayerComponent implements Component {
     public float damageCooldown;
     public int extraProjectiles;
     public int homingLevels;
+    public int rocketCount = 1;
     public int piercingLevels;
     public float fireRateMultiplier = 1f;
+    public float rocketFireRateMultiplier = 1f;
     public float speedMultiplier = 1f;
     public float rocketTimer = 1.2f;
+    public float ultimateCooldown;
     public int score;
 }
