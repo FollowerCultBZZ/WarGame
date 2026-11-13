@@ -2,7 +2,7 @@ package io.w8.game.core.ecs.factories;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.gdx.math.MathUtils;
+import io.w8.game.core.ecs.effects.ParticleEffectFactory;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
@@ -15,9 +15,11 @@ import io.w8.game.core.ecs.components.WeaponComponent;
 
 public class EntityFactory {
     private final Engine engine;
+    private final ParticleEffectFactory effects;
 
     public EntityFactory(Engine engine) {
         this.engine = engine;
+        effects = new ParticleEffectFactory(engine);
     }
 
     public Entity createPlayer(float x, float y) {
@@ -246,29 +248,6 @@ public class EntityFactory {
     }
 
     public void createEffect(float x, float y, float red, float green, float blue, float radius) {
-        Entity entity = engine.createEntity();
-        EffectComponent effect = new EffectComponent();
-        effect.startRed = red;
-        effect.startGreen = green;
-        effect.startBlue = blue;
-        int particleCount = MathUtils.random(12, MathUtils.clamp((int) (radius * 0.45f), 16, 30));
-        float speedScale = MathUtils.clamp(radius / 34f, 0.7f, 2.2f);
-
-        for (int i = 0; i < particleCount; i++) {
-            float angle = MathUtils.random(0f, 360f);
-            float speed = MathUtils.random(85f, 245f) * speedScale;
-            EffectComponent.Particle particle = new EffectComponent.Particle();
-            particle.x = x;
-            particle.y = y;
-            particle.velocityX = MathUtils.cosDeg(angle) * speed;
-            particle.velocityY = MathUtils.sinDeg(angle) * speed;
-            particle.size = MathUtils.random(2.5f, 6.5f) * MathUtils.clamp(speedScale, 0.8f, 1.35f);
-            particle.lifetime = MathUtils.random(0.58f, 0.95f);
-            effect.particles.add(particle);
-        }
-
-        entity.add(new TransformComponent(x, y));
-        entity.add(effect);
-        engine.addEntity(entity);
+        effects.createExplosion(x, y, radius, red, green, blue);
     }
 }
