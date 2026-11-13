@@ -74,6 +74,10 @@ public class CombatSystem extends EntitySystem {
                     factory.createEffect(shotTransform.x, shotTransform.y, 1f, 0.55f, 0.2f, projectile.rocket ? 25f : 12f);
                     if (enemy.health <= 0f) {
                         remove.add(enemyEntity);
+                        if (players.size() > 0) {
+                            PlayerComponent scorer = players.first().getComponent(PlayerComponent.class);
+                            scorer.score += enemy.kind == 1 ? 250 : enemy.kind == 0 ? 175 : 125;
+                        }
                         factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.25f, 0.18f, enemy.radius * 1.8f);
                         if (MathUtils.randomBoolean(0.42f)) {
                             factory.createPickup(enemyTransform.x, enemyTransform.y, MathUtils.random(0, 5));
@@ -105,7 +109,10 @@ public class CombatSystem extends EntitySystem {
                     player.damageCooldown = 0.65f;
                     enemy.health -= 1f;
                     factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.15f, 0.12f, 30f);
-                    if (enemy.health <= 0f) remove.add(enemyEntity);
+                    if (enemy.health <= 0f) {
+                        remove.add(enemyEntity);
+                        player.score += enemy.kind == 1 ? 250 : enemy.kind == 0 ? 175 : 125;
+                    }
                     break;
                 }
             }

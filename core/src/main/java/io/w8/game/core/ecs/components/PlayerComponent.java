@@ -12,4 +12,5 @@ public class PlayerComponent implements Component {
     public float fireRateMultiplier = 1f;
     public float speedMultiplier = 1f;
     public float rocketTimer = 1.2f;
+    public int score;
 }

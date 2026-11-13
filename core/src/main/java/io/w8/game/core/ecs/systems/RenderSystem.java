@@ -5,6 +5,8 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
@@ -15,6 +17,8 @@ import io.w8.game.core.world.Arena;
 
 public class RenderSystem extends EntitySystem {
     private final ShapeRenderer renderer = new ShapeRenderer();
+    private final SpriteBatch batch = new SpriteBatch();
+    private final BitmapFont font = new BitmapFont();
     private final OrthographicCamera camera;
     private final Arena arena;
     private ImmutableArray<Entity> entities;
@@ -123,9 +127,38 @@ public class RenderSystem extends EntitySystem {
             renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, height - 4f);
         }
         renderer.end();
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        font.setColor(1f, 1f, 1f, 1f);
+        font.getData().setScale(1.15f);
+        for (int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
+            PickupComponent pickup = entity.getComponent(PickupComponent.class);
+            if (pickup == null) continue;
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            String label;
+            switch (pickup.type) {
+                case PickupComponent.HEAL: label = "H"; break;
+                case PickupComponent.HOMING: label = "M"; break;
+                case PickupComponent.FIRE_RATE: label = "R"; break;
+                case PickupComponent.MULTI_SHOT: label = "C"; break;
+                case PickupComponent.SPEED: label = "S"; break;
+                default: label = "P"; break;
+            }
+            font.draw(batch, label, transform.x - 4.5f, transform.y + 4.5f);
+        }
+        if (players.size() > 0) {
+            PlayerComponent player = players.first().getComponent(PlayerComponent.class);
+            font.getData().setScale(1.35f);
+            font.draw(batch, "SCORE " + player.score, arena.getWidth() - 175f, arena.getHeight() - 22f);
+        }
+        batch.end();
     }
 
     public void dispose() {
         renderer.dispose();
+        batch.dispose();
+        font.dispose();
     }
 }

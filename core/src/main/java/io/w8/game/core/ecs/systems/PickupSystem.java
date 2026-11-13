@@ -49,6 +49,7 @@ public class PickupSystem extends EntitySystem {
                 if (dx * dx + dy * dy > 39f * 39f) continue;
 
                 int type = pickupEntity.getComponent(PickupComponent.class).type;
+                player.score += 25;
                 if (type == PickupComponent.SPEED) {
                     player.speedMultiplier = Math.min(2.15f, player.speedMultiplier + 0.15f);
                     velocity.maxSpeed = Math.min(1050f, velocity.maxSpeed + 35f);

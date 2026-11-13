@@ -10,4 +10,5 @@ public class EnemyComponent implements Component {
     public float fireTimer;
     public float fireInterval = 2.8f;
     public int kind;
+    public float strafePhase;
 }

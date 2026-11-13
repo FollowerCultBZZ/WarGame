@@ -18,7 +18,7 @@ public class EnemySystem extends EntitySystem {
     private EntityFactory factory;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> enemies;
-    private float spawnTimer = 0.8f;
+    private float spawnTimer = 0.65f;
     private float elapsed;
 
     public EnemySystem(Arena arena) {
@@ -40,36 +40,55 @@ public class EnemySystem extends EntitySystem {
         spawnTimer -= delta;
 
         if (spawnTimer <= 0f && players.size() > 0) {
-            int kind = MathUtils.random(0, 9) < 6 ? 0 : (MathUtils.randomBoolean() ? 1 : 2);
+            int roll = MathUtils.random(0, 99);
+            int kind = roll < 28 ? 0 : roll < 55 ? 1 : 2;
             float x = MathUtils.random(45f, Math.max(46f, arena.getWidth() - 45f));
-            factory.createEnemy(x, arena.getHeight() - 45f, kind, difficulty);
-            spawnTimer = Math.max(0.32f, 1.5f - elapsed * 0.009f);
+            factory.createEnemy(x, arena.getHeight() - 42f, kind, difficulty);
+            spawnTimer = Math.max(0.22f, 1.15f - elapsed * 0.014f);
         }
 
         if (players.size() == 0) return;
         TransformComponent target = players.first().getComponent(TransformComponent.class);
+        float shooterFloor = arena.getHeight() * 0.62f;
 
         for (int i = 0; i < enemies.size(); i++) {
             Entity entity = enemies.get(i);
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
             EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
-
             float dx = target.x - transform.x;
             float dy = target.y - transform.y;
             float length = (float) Math.sqrt(dx * dx + dy * dy);
-            if (length > 0.001f) {
-                float chaseFactor = enemy.kind == 1 ? 0.78f : 1f;
-                velocity.x = dx / length * enemy.speed * chaseFactor;
-                velocity.y = dy / length * enemy.speed * chaseFactor;
+
+            if (enemy.kind == 0) {
+                float sway = MathUtils.sin(elapsed * 1.8f + enemy.strafePhase);
+                velocity.x = sway * enemy.speed * 1.8f;
+                velocity.y = transform.y > shooterFloor ? -enemy.speed * 0.25f : 0f;
+                if (transform.y < shooterFloor) {
+                    transform.y = shooterFloor;
+                    velocity.y = 0f;
+                }
+            } else if (length > 0.001f) {
+                float nx = dx / length;
+                float ny = dy / length;
+                if (enemy.kind == 1) {
+                    velocity.x = nx * enemy.speed;
+                    velocity.y = ny * enemy.speed;
+                } else {
+                    float strafe = MathUtils.sin(elapsed * 5.2f + enemy.strafePhase) * enemy.speed * 0.78f;
+                    velocity.x = nx * enemy.speed - ny * strafe;
+                    velocity.y = ny * enemy.speed + nx * strafe;
+                }
             }
 
-            enemy.fireTimer -= delta;
-            if (enemy.fireTimer <= 0f) {
-                float fireSpeed = 250f + difficulty * 8f;
-                factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
-                        target.x, target.y, fireSpeed, 9f + difficulty * 0.55f);
-                enemy.fireTimer = Math.max(0.85f, enemy.fireInterval - difficulty * 0.055f);
+            if (enemy.kind == 0) {
+                enemy.fireTimer -= delta;
+                if (enemy.fireTimer <= 0f && transform.y >= shooterFloor) {
+                    float fireSpeed = 300f + difficulty * 11f;
+                    factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
+                            target.x, target.y, fireSpeed, 11f + difficulty * 0.7f);
+                    enemy.fireTimer = Math.max(0.72f, enemy.fireInterval - difficulty * 0.035f);
+                }
             }
         }
     }
