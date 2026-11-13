@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
+import io.w8.game.core.ecs.GameEngine;
 import io.w8.game.core.world.camera.CameraController;
 import io.w8.game.core.world.map.MapWorld;
 import io.w8.game.core.world.player.Player;
@@ -31,7 +32,8 @@ public class GameScreen extends ScreenAdapter {
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("build/game.atlas"));
     private final MapWorld world = new MapWorld(10, 10, 128, 64);
-    private final Player player = new Player(4096f, 4096f);
+    private final GameEngine gameEngine = new GameEngine();
+    private final Player player = new Player(gameEngine.getEngine(), 4096f, 4096f);
     private final CameraController cameraController = new CameraController(camera, world);
     private final WorldRenderer worldRenderer = new WorldRenderer(batch, atlas, world);
     private final GameHud hud = new GameHud();
@@ -204,6 +206,7 @@ public class GameScreen extends ScreenAdapter {
         float dt = Math.min(delta, 0.05f);
         gameTime.update(dt);
         player.update(dt, gameRules);
+        gameEngine.update(dt);
         searchSystem.update(dt, gameRules);
         cameraController.update(dt, player);
         Gdx.gl.glClearColor(0.07f, 0.09f, 0.08f, 1f);
@@ -237,6 +240,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        gameEngine.dispose();
         worldRenderer.dispose();
         hud.dispose();
         atlas.dispose();
