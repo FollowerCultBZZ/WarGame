@@ -53,6 +53,9 @@ public class RenderSystem extends EntitySystem {
             } else if (shape.type == ShapeComponent.RECTANGLE) {
                 renderer.rect(transform.x - shape.radius * 0.35f,
                         transform.y - shape.radius, shape.radius * 0.7f, shape.radius * 2f);
+            } else if (shape.type == ShapeComponent.SQUARE) {
+                renderer.rect(transform.x - shape.radius, transform.y - shape.radius,
+                        shape.radius * 2f, shape.radius * 2f);
             }
         }
 
