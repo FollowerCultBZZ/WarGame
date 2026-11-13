@@ -119,23 +119,9 @@ public class RenderSystem extends EntitySystem {
 
             if (shape.type == ShapeComponent.TRIANGLE) {
                 float r = shape.radius;
-                if (entity.getComponent(PlayerComponent.class) != null) {
-                    renderer.triangle(transform.x, transform.y + r * 1.35f,
-                            transform.x - r, transform.y - r,
-                            transform.x + r, transform.y - r);
-                    renderer.setColor(0.65f, 0.95f, 1f, 1f);
-                    renderer.triangle(transform.x, transform.y + r * 0.75f,
-                            transform.x - r * 0.38f, transform.y - r * 0.55f,
-                            transform.x + r * 0.38f, transform.y - r * 0.55f);
-                    renderer.setColor(0.15f, 0.65f, 1f, 1f);
-                    renderer.triangle(transform.x, transform.y - r * 0.72f,
-                            transform.x - r * 0.28f, transform.y - r * 1.45f,
-                            transform.x + r * 0.28f, transform.y - r * 1.45f);
-                } else {
-                    renderer.triangle(transform.x, transform.y + r * 1.35f,
-                            transform.x - r, transform.y - r,
-                            transform.x + r, transform.y - r);
-                }
+                renderer.triangle(transform.x, transform.y + r * 1.35f,
+                        transform.x - r, transform.y - r,
+                        transform.x + r, transform.y - r);
             } else if (shape.type == ShapeComponent.CIRCLE) {
                 renderer.circle(transform.x, transform.y, shape.radius, 20);
             } else {
