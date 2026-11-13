@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import io.w8.game.core.GameFonts;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
@@ -26,11 +27,15 @@ import io.w8.game.core.world.Arena;
 public class RenderSystem extends EntitySystem {
     private final ShapeRenderer renderer = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font;
     private final TextureAtlas atlas;
     private final TextureRegion playerRegion;
     private final TextureRegion bulletRegion;
     private final TextureRegion missileRegion;
+    private final TextureRegion healthIcon;
+    private final TextureRegion missileIcon;
+    private final TextureRegion reloadIcon;
+    private final TextureRegion countIcon;
     private final Animation<TextureRegion> fireAnimation;
     private final Animation<TextureRegion> shieldAnimation;
     private float animationTime;
@@ -48,6 +53,11 @@ public class RenderSystem extends EntitySystem {
         playerRegion = atlas.findRegion("player");
         bulletRegion = atlas.findRegion("bullet");
         missileRegion = atlas.findRegion("missile");
+        healthIcon = atlas.findRegion("health-icon");
+        missileIcon = atlas.findRegion("missile-icon");
+        reloadIcon = atlas.findRegion("reload-icon");
+        countIcon = atlas.findRegion("count-icon");
+        font = GameFonts.create(24);
 
         Array<TextureRegion> fireFrames = new Array<>();
         fireFrames.addAll(atlas.findRegions("fire"));
@@ -141,7 +151,7 @@ public class RenderSystem extends EntitySystem {
             renderer.setColor(0.08f, 0.1f, 0.16f, 0.95f);
             renderer.rect(x, y, width, height);
             renderer.setColor(ratio > 0.55f ? 0.18f : 1f,
-                    ratio > 0.55f ? 0.85f : ratio > 0.25f ? 0.68f : 0.2f,
+                    ratio > 0.55f ? 0.85f : ratio > 0.25f ? 0.68f : 0.12f,
                     ratio > 0.55f ? 0.35f : 0.12f, 1f);
             renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, height - 4f);
         }
@@ -179,16 +189,16 @@ public class RenderSystem extends EntitySystem {
                 drawCentered(flame, flameX, flameY, 20f, 28f, rotation);
             }
 
-            if (player.invulnerabilityTimer > 0f) {
-                TextureRegion shield = shieldAnimation.getKeyFrame(animationTime);
-                drawCentered(shield, transform.x, transform.y, 88f, 88f, rotation);
-            }
-
             float playerHeight = 64f;
             float playerWidth = playerHeight * playerRegion.getRegionWidth()
                     / (float) playerRegion.getRegionHeight();
             drawCentered(playerRegion, transform.x, transform.y,
                     playerWidth, playerHeight, rotation);
+
+            if (player.invulnerabilityTimer > 0f) {
+                TextureRegion shield = shieldAnimation.getKeyFrame(animationTime);
+                drawCentered(shield, transform.x, transform.y, 88f, 88f, rotation);
+            }
         }
 
         for (int i = 0; i < entities.size(); i++) {
@@ -203,28 +213,26 @@ public class RenderSystem extends EntitySystem {
         }
 
         font.setColor(1f, 1f, 1f, 1f);
-        font.getData().setScale(1.15f);
+        font.getData().setScale(1f);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             PickupComponent pickup = entity.getComponent(PickupComponent.class);
             if (pickup == null) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
-            String label;
-            switch (pickup.type) {
-                case PickupComponent.HEAL: label = "H"; break;
-                case PickupComponent.HOMING: label = "M"; break;
-                case PickupComponent.FIRE_RATE: label = "R"; break;
-                case PickupComponent.MULTI_SHOT: label = "C"; break;
-                case PickupComponent.SPEED: label = "S"; break;
-                default: label = "P"; break;
+            TextureRegion icon = getPickupIcon(pickup.type);
+            if (icon != null) {
+                drawCentered(icon, transform.x, transform.y, 30f, 30f, 0f);
+            } else {
+                String label = pickup.type == PickupComponent.SPEED ? "S"
+                        : pickup.type == PickupComponent.PIERCING ? "P" : "?";
+                font.draw(batch, label, transform.x - 5f, transform.y + 7f);
             }
-            font.draw(batch, label, transform.x - 4.5f, transform.y + 4.5f);
         }
+
         if (players.size() > 0) {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
-            font.getData().setScale(1.35f);
+            font.getData().setScale(1.1f);
             font.draw(batch, "SCORE " + player.score, arena.getWidth() - 175f, arena.getHeight() - 22f);
-            font.getData().setScale(1.15f);
             font.draw(batch, "LIVES " + player.lives, 20f, arena.getHeight() - 58f);
             if (player.invulnerabilityTimer > 0f) {
                 font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
@@ -243,7 +251,7 @@ public class RenderSystem extends EntitySystem {
                         player.rocketFireRateMultiplier), 20f, arena.getHeight() - 154f);
             }
             if (player.dead) {
-                font.getData().setScale(3.2f);
+                font.getData().setScale(3f);
                 font.draw(batch, "GAME OVER", arena.getWidth() * 0.5f - 100f, arena.getHeight() * 0.5f + 18f);
                 font.getData().setScale(1.5f);
                 font.draw(batch, "FINAL SCORE " + player.score, arena.getWidth() * 0.5f - 95f,
@@ -253,12 +261,22 @@ public class RenderSystem extends EntitySystem {
         for (int i = 0; i < enemies.size(); i++) {
             EnemyComponent enemy = enemies.get(i).getComponent(EnemyComponent.class);
             if (enemy.kind == 3) {
-                font.getData().setScale(1.1f);
+                font.getData().setScale(1.05f);
                 font.draw(batch, "BOSS " + enemy.bossNumber + "  STAGE " + enemy.bossStage,
                         arena.getWidth() * 0.18f, arena.getHeight() - 47f);
             }
         }
         batch.end();
+    }
+
+    private TextureRegion getPickupIcon(int type) {
+        switch (type) {
+            case PickupComponent.HEAL: return healthIcon;
+            case PickupComponent.HOMING: return missileIcon;
+            case PickupComponent.FIRE_RATE: return reloadIcon;
+            case PickupComponent.MULTI_SHOT: return countIcon;
+            default: return null;
+        }
     }
 
     private void drawCentered(TextureRegion region, float centerX, float centerY,
