@@ -334,8 +334,10 @@ public class RenderSystem extends EntitySystem {
             EnemyComponent enemy = enemies.get(i).getComponent(EnemyComponent.class);
             if (enemy.kind == 3) {
                 font.getData().setScale(1.05f);
-                font.draw(batch, "BOSS " + enemy.bossNumber + "  STAGE " + enemy.bossStage,
-                        arena.getWidth() * 0.18f, arena.getHeight() - 88f);
+                String bossText = "BOSS " + enemy.bossNumber + "  STAGE " + enemy.bossStage;
+                layout.setText(font, bossText);
+                font.draw(batch, bossText, (arena.getWidth() - layout.width) * 0.5f,
+                        arena.getHeight() - 88f);
             }
         }
         batch.end();
