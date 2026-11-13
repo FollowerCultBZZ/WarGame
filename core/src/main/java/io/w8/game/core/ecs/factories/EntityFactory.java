@@ -81,9 +81,37 @@ public class EntityFactory {
             shape.green = 0.62f;
             shape.blue = 0.16f;
         }
+        enemy.maxHealth = enemy.health;
+        enemy.strafePhase = (float) (Math.random() * Math.PI * 2f);
+        enemy.fireTimer = enemy.kind == 0 ? enemy.fireInterval * 0.45f : 999f;
+        entity.add(new TransformComponent(x, y));
+        entity.add(new VelocityComponent());
+        entity.add(enemy);
+        entity.add(shape);
+        engine.addEntity(entity);
+        return entity;
+    }
+
+    public Entity createBoss(float x, float y, int scoreMilestone) {
+        Entity entity = engine.createEntity();
+        EnemyComponent enemy = new EnemyComponent();
+        enemy.kind = 3;
+        enemy.maxHealth = 650f + (scoreMilestone / 10000) * 260f;
+        enemy.health = enemy.maxHealth;
+        enemy.speed = 125f + (scoreMilestone / 10000) * 8f;
+        enemy.contactDamage = 65f;
+        enemy.radius = 66f;
+        enemy.fireInterval = Math.max(0.55f, 1.25f - (scoreMilestone / 10000) * 0.06f);
+        enemy.fireTimer = 0.8f;
         enemy.strafePhase = (float) (Math.random() * Math.PI * 2f);
 
-        enemy.fireTimer = enemy.kind == 0 ? enemy.fireInterval * 0.45f : 999f;
+        ShapeComponent shape = new ShapeComponent();
+        shape.type = ShapeComponent.CIRCLE;
+        shape.radius = enemy.radius;
+        shape.red = 0.82f;
+        shape.green = 0.08f;
+        shape.blue = 0.16f;
+
         entity.add(new TransformComponent(x, y));
         entity.add(new VelocityComponent());
         entity.add(enemy);
