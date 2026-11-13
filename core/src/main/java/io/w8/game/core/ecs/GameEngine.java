@@ -4,7 +4,9 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import io.w8.game.core.ecs.systems.MovementSystem;
 import io.w8.game.core.ecs.systems.PlayerControlSystem;
+import io.w8.game.core.ecs.systems.ProjectileSystem;
 import io.w8.game.core.ecs.systems.RenderSystem;
+import io.w8.game.core.ecs.systems.WeaponSystem;
 import io.w8.game.core.input.GameInput;
 import io.w8.game.core.world.Arena;
 
@@ -17,7 +19,9 @@ public class GameEngine {
         renderSystem = new RenderSystem(camera, arena);
 
         engine.addSystem(new PlayerControlSystem(input, arena));
+        engine.addSystem(new WeaponSystem(engine));
         engine.addSystem(new MovementSystem(arena));
+        engine.addSystem(new ProjectileSystem(arena));
         engine.addSystem(renderSystem);
     }
 
