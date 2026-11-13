@@ -8,6 +8,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import io.w8.game.core.ecs.components.PickupComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
+import io.w8.game.core.ecs.components.ShapeComponent;
 import io.w8.game.core.ecs.components.VelocityComponent;
 import io.w8.game.core.ecs.factories.EntityFactory;
 
@@ -49,7 +50,11 @@ public class PickupSystem extends EntitySystem {
                 TransformComponent pickupTransform = pickupEntity.getComponent(TransformComponent.class);
                 float dx = playerTransform.x - pickupTransform.x;
                 float dy = playerTransform.y - pickupTransform.y;
-                if (dx * dx + dy * dy > 39f * 39f) continue;
+                ShapeComponent playerShape = playerEntity.getComponent(ShapeComponent.class);
+                ShapeComponent pickupShape = pickupEntity.getComponent(ShapeComponent.class);
+                float hitRadius = (playerShape == null ? 24f : playerShape.radius)
+                        + (pickupShape == null ? 13f : pickupShape.radius);
+                if (dx * dx + dy * dy > hitRadius * hitRadius) continue;
 
                 switch (pickup.type) {
                     case PickupComponent.SPEED:
@@ -63,8 +68,8 @@ public class PickupSystem extends EntitySystem {
                         }
                         break;
                     case PickupComponent.FIRE_RATE:
-                        if (player.fireRateMultiplier < 2.5f) {
-                            player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
+                        if (player.fireRateMultiplier < 3.0f) {
+                            player.fireRateMultiplier = Math.min(3.0f, player.fireRateMultiplier + 0.25f);
                         } else {
                             player.fireRateOverdriveTimer = 8f;
                         }
