@@ -49,7 +49,7 @@ public class EntityFactory {
         ShapeComponent shape = new ShapeComponent();
 
         if (kind == 0) {
-            enemy.health = 10f + difficulty * 2.0f;
+            enemy.health = 6.5f + difficulty * 1.25f;
             enemy.speed = 58f + difficulty * 2.2f;
             enemy.contactDamage = 24f + difficulty * 1.0f;
             enemy.radius = 23f;
@@ -60,7 +60,7 @@ public class EntityFactory {
             shape.green = 0.72f;
             shape.blue = 1f;
         } else if (kind == 1) {
-            enemy.health = 24f + difficulty * 3.4f;
+            enemy.health = 15f + difficulty * 2.2f;
             enemy.speed = 118f + difficulty * 4.8f;
             enemy.contactDamage = 42f + difficulty * 1.8f;
             enemy.radius = 31f;
@@ -71,7 +71,7 @@ public class EntityFactory {
             shape.green = 0.24f;
             shape.blue = 0.18f;
         } else {
-            enemy.health = 7f + difficulty * 1.25f;
+            enemy.health = 4.5f + difficulty * 0.8f;
             enemy.speed = 235f + difficulty * 9f;
             enemy.contactDamage = 20f + difficulty * 0.9f;
             enemy.radius = 17f;
