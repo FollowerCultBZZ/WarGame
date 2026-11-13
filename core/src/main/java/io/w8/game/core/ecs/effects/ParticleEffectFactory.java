@@ -40,7 +40,7 @@ public class ParticleEffectFactory {
     }
 
     public void createRocketTrail(float x, float y, float velocityX, float velocityY) {
-        EffectComponent effect = createEffect(x, y);
+        EffectComponent effect = createEffect();
         setWarmToAshGradient(effect, 1f, 0.38f, 0.06f);
         effect.middleRed = 1f;
         effect.middleGreen = 0.24f;
