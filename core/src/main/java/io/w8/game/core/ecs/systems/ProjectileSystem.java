@@ -44,7 +44,7 @@ public class ProjectileSystem extends EntitySystem {
                 if (projectile.trailTimer <= 0f) {
                     VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
                     effects.createRocketTrail(transform.x, transform.y, velocity.x, velocity.y);
-                    projectile.trailTimer = 0.035f;
+                    projectile.trailTimer = 0.05f;
                 }
             }
             if (projectile.remainingLife <= 0f
