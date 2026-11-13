@@ -48,9 +48,11 @@ public class WeaponSystem extends EntitySystem {
             if (stats.homingLevels > 0) {
                 stats.rocketTimer -= delta;
                 if (stats.rocketTimer <= 0f) {
-                    factory.createRocket(transform.x - 12f, transform.y + 4f);
-                    if (stats.homingLevels >= 2) factory.createRocket(transform.x + 12f, transform.y + 4f);
-                    stats.rocketTimer = Math.max(0.55f, 2.8f - stats.homingLevels * 0.45f);
+                    for (int rocket = 0; rocket < stats.rocketCount; rocket++) {
+                        float offset = (rocket - (stats.rocketCount - 1) * 0.5f) * 18f;
+                        factory.createRocket(transform.x + offset, transform.y + 4f);
+                    }
+                    stats.rocketTimer = Math.max(0.32f, 2.8f / stats.rocketFireRateMultiplier);
                 }
             }
         }
