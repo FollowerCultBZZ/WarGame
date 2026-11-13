@@ -4,10 +4,6 @@ plugins {
 }
 
 android {
-    sourceSets {
-        main.assets.srcDirs = ['assets']
-    }
-
     namespace 'io.w8.game'
     compileSdk 34
 
