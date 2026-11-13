@@ -8,6 +8,10 @@ public class GameInput extends InputAdapter {
     private final Viewport viewport;
     private final Vector2 pointerWorld = new Vector2();
     private boolean pointerDown;
+    private boolean ultimatePressed;
+    private long lastTapTime;
+    private int lastTapX;
+    private int lastTapY;
 
     public GameInput(Viewport viewport) {
         this.viewport = viewport;
@@ -16,6 +20,18 @@ public class GameInput extends InputAdapter {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
+        long now = System.currentTimeMillis();
+        int tapDx = screenX - lastTapX;
+        int tapDy = screenY - lastTapY;
+        if (lastTapTime != 0L && now - lastTapTime <= 330L
+                && tapDx * tapDx + tapDy * tapDy <= 90 * 90) {
+            ultimatePressed = true;
+            lastTapTime = 0L;
+        } else {
+            lastTapTime = now;
+            lastTapX = screenX;
+            lastTapY = screenY;
+        }
         updatePointer(screenX, screenY);
         pointerDown = true;
         return true;
@@ -39,6 +55,12 @@ public class GameInput extends InputAdapter {
     private void updatePointer(int screenX, int screenY) {
         pointerWorld.set(screenX, screenY);
         viewport.unproject(pointerWorld);
+    }
+
+    public boolean consumeUltimatePressed() {
+        boolean pressed = ultimatePressed;
+        ultimatePressed = false;
+        return pressed;
     }
 
     public boolean isPointerDown() {
