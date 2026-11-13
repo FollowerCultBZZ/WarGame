@@ -6,6 +6,7 @@ public class ShapeComponent implements Component {
     public static final int TRIANGLE = 0;
     public static final int CIRCLE = 1;
     public static final int RECTANGLE = 2;
+    public static final int SQUARE = 3;
 
     public int type = TRIANGLE;
     public float radius = 18f;
