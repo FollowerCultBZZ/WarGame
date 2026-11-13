@@ -89,6 +89,12 @@ public class EnemySystem extends EntitySystem {
                     enemy.bossAttackTimer = 1.1f;
                     enemy.bossRadialVolleyCount = 0;
                     factory.createEffect(transform.x, transform.y, 1f, 0.12f, 0.25f, enemy.radius * 2.8f);
+                } else if (enemy.bossNumber >= 2 && enemy.bossStage == 2
+                        && enemy.health <= enemy.maxHealth * 0.25f) {
+                    enemy.bossStage = 3;
+                    enemy.bossAttackTimer = 0.25f;
+                    enemy.bossWaveRotation = 0f;
+                    factory.createEffect(transform.x, transform.y, 0.75f, 0.08f, 1f, enemy.radius * 3.4f);
                 }
 
                 if (enemy.bossStage == 1) {
@@ -122,7 +128,7 @@ public class EnemySystem extends EntitySystem {
                             enemy.bossShotTimer = 0f;
                         }
                     }
-                } else {
+                } else if (enemy.bossStage == 2) {
                     enemy.bossAttackTimer -= delta;
                     if (enemy.bossAttackTimer <= 0f) {
                         int bulletCount = 18;
@@ -140,6 +146,21 @@ public class EnemySystem extends EntitySystem {
                             enemy.bossRadialVolleyCount = 0;
                             enemy.bossAttackTimer = 2.75f;
                         }
+                    }
+                } else {
+                    enemy.bossAttackTimer -= delta;
+                    if (enemy.bossAttackTimer <= 0f) {
+                        int bulletCount = 24;
+                        for (int bullet = 0; bullet < bulletCount; bullet++) {
+                            float angle = enemy.bossWaveRotation + bullet * 360f / bulletCount;
+                            float targetX = transform.x + MathUtils.cosDeg(angle) * 190f;
+                            float targetY = transform.y + MathUtils.sinDeg(angle) * 190f;
+                            factory.createEnemyProjectile(transform.x, transform.y,
+                                    targetX, targetY, 475f + difficulty * 4f,
+                                    18f + difficulty * 0.35f);
+                        }
+                        enemy.bossWaveRotation = (enemy.bossWaveRotation + 13f) % 360f;
+                        enemy.bossAttackTimer = 0.82f;
                     }
                 }
 
