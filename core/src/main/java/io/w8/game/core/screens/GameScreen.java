@@ -5,6 +5,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import io.w8.game.core.Core;
 import io.w8.game.core.ecs.GameEngine;
 import io.w8.game.core.ecs.factories.EntityFactory;
 import io.w8.game.core.input.GameInput;
@@ -14,13 +15,15 @@ public class GameScreen extends ScreenAdapter {
     private static final float VIEW_WIDTH = 720f;
     private static final float VIEW_HEIGHT = 1280f;
 
+    private final Core game;
     private final OrthographicCamera camera;
     private final ExtendViewport viewport;
     private final Arena arena;
     private final GameInput input;
     private final GameEngine gameEngine;
 
-    public GameScreen() {
+    public GameScreen(Core game) {
+        this.game = game;
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
@@ -45,6 +48,13 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         gameEngine.update(dt);
+        boolean gameOver = gameEngine.isPlayerDead();
+        input.setGameOver(gameOver);
+        if (gameOver && input.consumeRestartPressed()) {
+            dispose();
+            game.setScreen(new GameScreen(game));
+            return;
+        }
         camera.update();
         gameEngine.render();
     }
