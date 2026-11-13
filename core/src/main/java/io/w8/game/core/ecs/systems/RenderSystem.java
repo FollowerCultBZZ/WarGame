@@ -50,15 +50,11 @@ public class RenderSystem extends EntitySystem {
         missileRegion = atlas.findRegion("missile");
 
         Array<TextureRegion> fireFrames = new Array<>();
-        for (int i = 0; i < 3; i++) {
-            fireFrames.add(atlas.findRegion("fire_" + i));
-        }
+        fireFrames.addAll(atlas.findRegions("fire"));
         fireAnimation = new Animation<>(0.075f, fireFrames, Animation.PlayMode.LOOP);
 
         Array<TextureRegion> shieldFrames = new Array<>();
-        for (int i = 0; i < 4; i++) {
-            shieldFrames.add(atlas.findRegion("shield_" + i));
-        }
+        shieldFrames.addAll(atlas.findRegions("shield"));
         shieldAnimation = new Animation<>(0.11f, shieldFrames, Animation.PlayMode.LOOP);
     }
 
