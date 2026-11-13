@@ -19,4 +19,6 @@ public class EnemyComponent implements Component {
     public float bossSweepAngle = 220f;
     public int bossSweepDirection = 1;
     public int bossRadialVolleyCount;
+    public int bossNumber = 1;
+    public float bossWaveRotation;
 }
