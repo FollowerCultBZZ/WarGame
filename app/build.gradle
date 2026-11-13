@@ -101,6 +101,7 @@ tasks.register('buildAtlases', JavaExec) {
 
         args = [
             '--filter', 'Nearest,Nearest',
+            '--useIndexes',
             '--paddingX', '2',
             '--paddingY', '2',
             '--duplicatePadding',
