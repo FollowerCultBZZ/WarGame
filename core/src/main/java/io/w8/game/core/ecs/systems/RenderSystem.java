@@ -19,7 +19,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.ecs.effects.ParticleRenderer;
 import io.w8.game.core.GameFonts;
-import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.ProjectileComponent;
@@ -160,11 +159,7 @@ public class RenderSystem extends EntitySystem {
 
         renderer.end();
 
-        Array<EffectComponent> particleEffects = new Array<>(effects.size());
-        for (int i = 0; i < effects.size(); i++) {
-            particleEffects.add(effects.get(i).getComponent(EffectComponent.class));
-        }
-        particleRenderer.render(particleEffects);
+        particleRenderer.render(effects);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
