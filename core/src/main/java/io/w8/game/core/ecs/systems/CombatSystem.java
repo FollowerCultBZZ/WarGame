@@ -60,7 +60,6 @@ public class CombatSystem extends EntitySystem {
                 continue;
             }
 
-            boolean hit = false;
             for (int j = 0; j < enemies.size(); j++) {
                 Entity enemyEntity = enemies.get(j);
                 if (remove.contains(enemyEntity, true)) continue;
@@ -71,7 +70,6 @@ public class CombatSystem extends EntitySystem {
                 float hitRadius = enemy.radius + (projectile.rocket ? 13f : 8f);
 
                 if (dx * dx + dy * dy <= hitRadius * hitRadius) {
-                    hit = true;
                     float splash = projectile.splashRadius;
                     for (int k = 0; k < enemies.size(); k++) {
                         Entity affected = enemies.get(k);
