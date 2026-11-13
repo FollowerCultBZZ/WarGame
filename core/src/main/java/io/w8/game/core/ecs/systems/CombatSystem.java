@@ -105,8 +105,8 @@ public class CombatSystem extends EntitySystem {
                                         : affectedEnemy.kind == 0 ? 275 : 200;
                             }
                             factory.createEffect(affectedTransform.x, affectedTransform.y,
-                                    1f, affectedEnemy.kind == 3 ? 0.12f : 0.25f,
-                                    0.18f, affectedEnemy.radius * (affectedEnemy.kind == 3 ? 2.5f : 1.8f));
+                                    1f, 0.94f, 0.12f,
+                                    affectedEnemy.radius * (affectedEnemy.kind == 3 ? 2.5f : 1.8f));
                             if (affectedEnemy.kind != 3 && MathUtils.randomBoolean(0.42f)) {
                                 int[] pickupTypes = {
                                         io.w8.game.core.ecs.components.PickupComponent.HEAL,
