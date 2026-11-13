@@ -60,7 +60,13 @@ public class PickupSystem extends EntitySystem {
                 } else if (type == PickupComponent.HEAL) {
                     player.health = Math.min(player.maxHealth, player.health + 28f);
                 } else if (type == PickupComponent.HOMING) {
-                    player.homingLevels = Math.min(3, player.homingLevels + 1);
+                    if (player.rocketCount < 4) {
+                        player.rocketCount++;
+                    } else {
+                        player.rocketFireRateMultiplier = Math.min(2.25f,
+                                player.rocketFireRateMultiplier + 0.25f);
+                    }
+                    player.homingLevels = Math.min(4, player.homingLevels + 1);
                 } else if (type == PickupComponent.PIERCING) {
                     player.piercingLevels = Math.min(3, player.piercingLevels + 1);
                 }
