@@ -17,7 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
+import io.w8.game.core.ecs.effects.ParticleRenderer;
 import io.w8.game.core.GameFonts;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
@@ -31,6 +31,7 @@ import io.w8.game.core.world.Arena;
 
 public class RenderSystem extends EntitySystem {
     private final ShapeRenderer renderer = new ShapeRenderer();
+    private final ParticleRenderer particleRenderer = new ParticleRenderer(renderer);
     private final SpriteBatch batch = new SpriteBatch();
     private final BitmapFont font;
     private final TextureAtlas atlas;
@@ -159,32 +160,11 @@ public class RenderSystem extends EntitySystem {
 
         renderer.end();
 
-        renderer.begin(ShapeRenderer.ShapeType.Filled);
+        Array<EffectComponent> particleEffects = new Array<>(effects.size());
         for (int i = 0; i < effects.size(); i++) {
-            EffectComponent effect = effects.get(i).getComponent(EffectComponent.class);
-            for (int p = 0; p < effect.particles.size; p++) {
-                EffectComponent.Particle particle = effect.particles.get(p);
-                float progress = Math.min(1f, particle.age / particle.lifetime);
-                float red;
-                float green;
-                float blue;
-                if (progress < 0.48f) {
-                    float t = progress / 0.48f;
-                    red = MathUtils.lerp(effect.startRed, effect.middleRed, t);
-                    green = MathUtils.lerp(effect.startGreen, effect.middleGreen, t);
-                    blue = MathUtils.lerp(effect.startBlue, effect.middleBlue, t);
-                } else {
-                    float t = (progress - 0.48f) / 0.52f;
-                    red = MathUtils.lerp(effect.middleRed, effect.endRed, t);
-                    green = MathUtils.lerp(effect.middleGreen, effect.endGreen, t);
-                    blue = MathUtils.lerp(effect.middleBlue, effect.endBlue, t);
-                }
-                float alpha = 1f - progress;
-                float size = particle.size * (1f - progress * 0.45f);
-                renderer.setColor(red, green, blue, alpha);
-                renderer.circle(particle.x, particle.y, size, 8);
-            }
+            particleEffects.add(effects.get(i).getComponent(EffectComponent.class));
         }
+        particleRenderer.render(particleEffects);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
