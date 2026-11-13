@@ -41,27 +41,32 @@ public class ParticleEffectFactory {
 
     public void createRocketTrail(float x, float y, float velocityX, float velocityY) {
         EffectComponent effect = createEffect();
-        setWarmToAshGradient(effect, 1f, 0.38f, 0.06f);
-        effect.middleRed = 1f;
-        effect.middleGreen = 0.24f;
-        effect.middleBlue = 0.025f;
+        effect.startRed = 1f;
+        effect.startGreen = 0.72f;
+        effect.startBlue = 0.18f;
+        effect.middleRed = 0.58f;
+        effect.middleGreen = 0.55f;
+        effect.middleBlue = 0.52f;
+        effect.endRed = 0.27f;
+        effect.endGreen = 0.3f;
+        effect.endBlue = 0.34f;
 
         float baseAngle = MathUtils.atan2Deg(velocityY, velocityX) + 180f;
-        int count = MathUtils.random(2, 3);
+        int count = MathUtils.random(3, 4);
 
         for (int i = 0; i < count; i++) {
-            float angle = baseAngle + MathUtils.random(-22f, 22f);
-            float speed = MathUtils.random(25f, 85f);
+            float angle = baseAngle + MathUtils.random(-30f, 30f);
+            float speed = MathUtils.random(18f, 62f);
             EffectComponent.Particle particle = createParticle(
                     x + MathUtils.random(-3f, 3f),
                     y + MathUtils.random(-3f, 3f),
-                    angle, speed, MathUtils.random(3f, 6f),
-                    MathUtils.random(0.24f, 0.42f)
+                    angle, speed, MathUtils.random(4.5f, 7f),
+                    MathUtils.random(0.48f, 0.68f)
             );
-            particle.velocityX += velocityX * 0.16f;
-            particle.velocityY += velocityY * 0.16f;
-            particle.endSizeScale = 0.08f;
-            particle.drag = 2.8f;
+            particle.velocityX += velocityX * 0.12f;
+            particle.velocityY += velocityY * 0.12f;
+            particle.endSizeScale = 1.15f;
+            particle.drag = 1.7f;
             effect.particles.add(particle);
         }
 
