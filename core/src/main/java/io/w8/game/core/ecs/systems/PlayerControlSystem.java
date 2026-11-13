@@ -37,6 +37,11 @@ public class PlayerControlSystem extends EntitySystem {
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
             PlayerComponent player = entity.getComponent(PlayerComponent.class);
+            if (player.dead) {
+                velocity.x = 0f;
+                velocity.y = 0f;
+                continue;
+            }
 
             player.ultimateCooldown = Math.max(0f, player.ultimateCooldown - delta);
             if (input.consumeUltimatePressed() && player.ultimateCooldown <= 0f) {
