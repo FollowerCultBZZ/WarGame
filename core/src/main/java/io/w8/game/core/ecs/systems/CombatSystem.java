@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.ProjectileComponent;
+import io.w8.game.core.ecs.components.ShapeComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.ecs.components.VelocityComponent;
 import io.w8.game.core.ecs.factories.EntityFactory;
@@ -62,7 +63,8 @@ public class CombatSystem extends EntitySystem {
                     TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
                     float dx = shotTransform.x - playerTransform.x;
                     float dy = shotTransform.y - playerTransform.y;
-                    if (dx * dx + dy * dy <= 28f * 28f) {
+                    float hitRadius = entityRadius(playerEntity, 24f) + entityRadius(shot, 7f);
+                    if (dx * dx + dy * dy <= hitRadius * hitRadius) {
                         if (player.invulnerabilityTimer <= 0f && player.damageCooldown <= 0f) {
                             damagePlayer(playerEntity, projectile.damage, 0.35f);
                         }
@@ -80,7 +82,7 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = shotTransform.x - enemyTransform.x;
                 float dy = shotTransform.y - enemyTransform.y;
-                float hitRadius = enemy.radius + (projectile.rocket ? 13f : 8f);
+                float hitRadius = enemy.radius + entityRadius(shot, projectile.rocket ? 13f : 6f);
 
                 if (dx * dx + dy * dy <= hitRadius * hitRadius) {
                     float splash = projectile.splashRadius;
@@ -139,7 +141,7 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = playerTransform.x - enemyTransform.x;
                 float dy = playerTransform.y - enemyTransform.y;
-                float radius = enemy.radius + 22f;
+                float radius = enemy.radius + entityRadius(playerEntity, 24f);
                 if (dx * dx + dy * dy <= radius * radius) {
                     damagePlayer(playerEntity, enemy.contactDamage, 0.65f);
                     enemy.health -= 1f;
@@ -157,6 +159,11 @@ public class CombatSystem extends EntitySystem {
         }
 
         for (int i = 0; i < remove.size; i++) engine.removeEntity(remove.get(i));
+    }
+
+    private float entityRadius(Entity entity, float fallback) {
+        ShapeComponent shape = entity.getComponent(ShapeComponent.class);
+        return shape == null ? fallback : shape.radius;
     }
 
     private void damagePlayer(Entity entity, float damage, float cooldown) {
