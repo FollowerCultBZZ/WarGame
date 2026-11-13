@@ -52,23 +52,22 @@ public class PlayerControlSystem extends EntitySystem {
                 player.ultimateCooldown = 22f;
             }
 
-            float desiredX = 0f;
-            float desiredY = 0f;
-            if (input.isPointerDown()) {
-                float dx = input.getPointerX() - transform.x;
-                float dy = input.getPointerY() - transform.y;
-                float distance = (float) Math.sqrt(dx * dx + dy * dy);
-                if (distance > 3f) {
-                    float speed = Math.min(velocity.maxSpeed * player.speedMultiplier, distance * 18f);
-                    desiredX = dx / distance * speed;
-                    desiredY = dy / distance * speed;
-                }
+            float moveX = input.isPointerDown() ? input.getMoveX() : 0f;
+            float moveY = input.isPointerDown() ? input.getMoveY() : 0f;
+            float inputLength = (float) Math.sqrt(moveX * moveX + moveY * moveY);
+            if (inputLength > 1f) {
+                moveX /= inputLength;
+                moveY /= inputLength;
             }
 
-            float maxChange = velocity.acceleration * delta * (input.isPointerDown() ? 2.2f : 3.2f);
+            float maxSpeed = velocity.maxSpeed * player.speedMultiplier;
+            float desiredX = moveX * maxSpeed;
+            float desiredY = moveY * maxSpeed;
+            float acceleration = velocity.acceleration * delta;
+            float maxChange = acceleration * (inputLength > 0f ? 1.65f : 1.9f);
             velocity.x = approach(velocity.x, desiredX, maxChange);
             velocity.y = approach(velocity.y, desiredY, maxChange);
-            if (!input.isPointerDown() && Math.abs(velocity.x) + Math.abs(velocity.y) < 8f) {
+            if (inputLength == 0f && Math.abs(velocity.x) + Math.abs(velocity.y) < 8f) {
                 velocity.x = 0f;
                 velocity.y = 0f;
             }
