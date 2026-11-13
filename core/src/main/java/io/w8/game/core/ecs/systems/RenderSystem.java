@@ -48,6 +48,13 @@ public class RenderSystem extends EntitySystem {
             if (shape.type == ShapeComponent.CIRCLE) {
                 renderer.circle(transform.x, transform.y, r, 24);
                 renderer.circle(transform.x, transform.y, r * 0.55f, 16);
+                float angle = (float) Math.toRadians(transform.rotation);
+                renderer.line(
+                        transform.x + (float) Math.cos(angle) * r * 0.55f,
+                        transform.y + (float) Math.sin(angle) * r * 0.55f,
+                        transform.x + (float) Math.cos(angle) * r,
+                        transform.y + (float) Math.sin(angle) * r
+                );
             } else {
                 renderer.rect(transform.x - r, transform.y - r, r, r,
                         r, r, 1f, 1f, transform.rotation);
@@ -83,6 +90,10 @@ public class RenderSystem extends EntitySystem {
                     renderer.triangle(transform.x, transform.y + r * 0.75f,
                             transform.x - r * 0.38f, transform.y - r * 0.55f,
                             transform.x + r * 0.38f, transform.y - r * 0.55f);
+                    renderer.setColor(0.15f, 0.65f, 1f, 1f);
+                    renderer.triangle(transform.x, transform.y - r * 0.72f,
+                            transform.x - r * 0.28f, transform.y - r * 1.45f,
+                            transform.x + r * 0.28f, transform.y - r * 1.45f);
                 } else {
                     renderer.triangle(transform.x, transform.y + r * 1.35f,
                             transform.x - r, transform.y - r,
