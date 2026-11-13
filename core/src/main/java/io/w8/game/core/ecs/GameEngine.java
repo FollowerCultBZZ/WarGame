@@ -28,7 +28,7 @@ public class GameEngine {
         engine.addSystem(new WeaponSystem(engine));
         engine.addSystem(new HomingSystem());
         engine.addSystem(new MovementSystem(arena));
-        engine.addSystem(new CombatSystem());
+        engine.addSystem(new CombatSystem(arena));
         engine.addSystem(new PickupSystem());
         engine.addSystem(new ProjectileSystem(arena));
         engine.addSystem(new EffectSystem());
