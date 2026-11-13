@@ -36,19 +36,40 @@ public class EnemySystem extends EntitySystem {
     public void update(float deltaTime) {
         float delta = Math.min(deltaTime, 0.05f);
         elapsed += delta;
-        float difficulty = Math.min(20f, elapsed / 18f);
-        spawnTimer -= delta;
+        if (players.size() == 0) return;
 
-        if (spawnTimer <= 0f && players.size() > 0) {
+        PlayerComponent player = players.first().getComponent(PlayerComponent.class);
+        if (player.dead) return;
+
+        float difficulty = Math.min(30f, Math.max(elapsed / 18f, player.score / 1800f));
+        boolean bossAlive = false;
+        for (int i = 0; i < enemies.size(); i++) {
+            if (enemies.get(i).getComponent(EnemyComponent.class).kind == 3) {
+                bossAlive = true;
+                break;
+            }
+        }
+
+        if (!bossAlive && player.score >= player.nextBossScore) {
+            factory.createBoss(arena.getWidth() * 0.5f, arena.getHeight() * 0.88f, player.nextBossScore);
+            player.nextBossScore += 10000;
+            bossAlive = true;
+        }
+
+        int scoreTier = player.score / 10000;
+        int maxEnemies = Math.min(72, 12 + scoreTier * 12);
+        spawnTimer -= delta;
+        if (!bossAlive && enemies.size() < maxEnemies && spawnTimer <= 0f) {
             int roll = MathUtils.random(0, 99);
             int kind = roll < 30 ? 0 : roll < 62 ? 1 : 2;
             float x = MathUtils.random(38f, Math.max(39f, arena.getWidth() - 38f));
             factory.createEnemy(x, arena.getHeight() - 38f, kind, difficulty);
-            float baseInterval = 1.85f - difficulty * 0.065f;
-            spawnTimer = Math.max(0.24f, baseInterval);
+            float baseInterval = 1.85f - difficulty * 0.052f;
+            spawnTimer = Math.max(0.32f, baseInterval);
+        } else if (enemies.size() >= maxEnemies) {
+            spawnTimer = Math.min(spawnTimer, 0.35f);
         }
 
-        if (players.size() == 0) return;
         TransformComponent target = players.first().getComponent(TransformComponent.class);
         float shooterFloor = arena.getHeight() * 0.70f;
         float shooterCeiling = arena.getHeight() * 0.94f;
@@ -58,6 +79,28 @@ public class EnemySystem extends EntitySystem {
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
             EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
+            if (enemy.kind == 3) {
+                float laneY = arena.getHeight() * 0.86f;
+                velocity.x = MathUtils.sin(elapsed * 0.85f + enemy.strafePhase) * enemy.speed * 1.5f;
+                velocity.y = MathUtils.clamp((laneY - transform.y) * 2f, -enemy.speed * 0.4f, enemy.speed * 0.4f);
+                enemy.fireTimer -= delta;
+                if (enemy.fireTimer <= 0f) {
+                    float damage = 24f + difficulty * 0.7f;
+                    factory.createEnemyProjectile(transform.x - 25f, transform.y - enemy.radius,
+                            target.x - 110f, target.y, 430f + difficulty * 5f, damage);
+                    factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
+                            target.x, target.y, 460f + difficulty * 5f, damage);
+                    factory.createEnemyProjectile(transform.x + 25f, transform.y - enemy.radius,
+                            target.x + 110f, target.y, 430f + difficulty * 5f, damage);
+                    enemy.fireTimer = enemy.fireInterval;
+                }
+                float halfWidth = arena.getWidth() * 0.5f - enemy.radius;
+                if (transform.x < enemy.radius || transform.x > arena.getWidth() - enemy.radius) {
+                    velocity.x *= -1f;
+                }
+                continue;
+            }
+
             float dx = target.x - transform.x;
             float dy = target.y - transform.y;
             float length = (float) Math.sqrt(dx * dx + dy * dy);
