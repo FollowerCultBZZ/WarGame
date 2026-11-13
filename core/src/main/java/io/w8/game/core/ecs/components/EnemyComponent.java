@@ -12,4 +12,11 @@ public class EnemyComponent implements Component {
     public float fireInterval = 2.8f;
     public int kind;
     public float strafePhase;
+    public int bossStage = 1;
+    public float bossAttackTimer = 1.2f;
+    public float bossPatternActiveTimer;
+    public float bossShotTimer;
+    public float bossSweepAngle = 220f;
+    public int bossSweepDirection = 1;
+    public int bossRadialVolleyCount;
 }
