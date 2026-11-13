@@ -24,7 +24,7 @@ public class EntityFactory {
         Entity entity = engine.createEntity();
         VelocityComponent velocity = new VelocityComponent();
         velocity.maxSpeed = 920f;
-        velocity.acceleration = 8200f;
+        velocity.acceleration = 4200f;
 
         ShapeComponent shape = new ShapeComponent();
         shape.type = ShapeComponent.TRIANGLE;
