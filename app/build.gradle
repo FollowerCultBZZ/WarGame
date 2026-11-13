@@ -64,9 +64,15 @@ tasks.register('copyGameFonts', Copy) {
     into file('src/main/assets/font')
 }
 
+tasks.register('copyArenaBackground', Copy) {
+    from file('assets/background.jpg')
+    into file('src/main/assets')
+}
+
 tasks.named('preBuild').configure {
     dependsOn 'copyAndroidNatives'
     dependsOn 'copyGameFonts'
+    dependsOn 'copyArenaBackground'
 }
 
 tasks.register('buildAtlases', JavaExec) {
