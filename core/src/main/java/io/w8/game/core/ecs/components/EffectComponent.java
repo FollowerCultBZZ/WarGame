@@ -6,6 +6,9 @@ import com.badlogic.gdx.utils.Array;
 public class EffectComponent implements Component {
     public float age;
     public float duration = 0.95f;
+    public float startRed = 1f;
+    public float startGreen = 0.94f;
+    public float startBlue = 0.12f;
     public final Array<Particle> particles = new Array<>();
 
     public static class Particle {
