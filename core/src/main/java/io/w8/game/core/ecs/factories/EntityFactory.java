@@ -159,14 +159,27 @@ public class EntityFactory {
         Entity entity = createProjectile(x, y, 0f, 640f, true, 0);
         ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
         projectile.rocket = true;
-        projectile.damage = 3f;
-        projectile.remainingLife = 4f;
+        projectile.damage = 4f;
+        projectile.splashRadius = 78f;
+        projectile.remainingLife = 5f;
         ShapeComponent shape = entity.getComponent(ShapeComponent.class);
         shape.type = ShapeComponent.RECTANGLE;
         shape.radius = 13f;
         shape.red = 0.95f;
         shape.green = 0.35f;
         shape.blue = 1f;
+        return entity;
+    }
+
+    public Entity createUltimateRocket(float x, float y) {
+        Entity entity = createRocket(x, y);
+        ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
+        projectile.damage = 6f;
+        projectile.splashRadius = 112f;
+        VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
+        velocity.x = 0f;
+        velocity.y = 820f;
+        velocity.maxSpeed = 820f;
         return entity;
     }
 
