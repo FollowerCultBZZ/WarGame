@@ -21,13 +21,27 @@ public class EffectSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        float delta = Math.min(deltaTime, 0.05f);
         expired.clear();
+
         for (int i = 0; i < effects.size(); i++) {
             Entity entity = effects.get(i);
             EffectComponent effect = entity.getComponent(EffectComponent.class);
-            effect.age += deltaTime;
+            effect.age += delta;
+
+            for (int p = 0; p < effect.particles.size; p++) {
+                EffectComponent.Particle particle = effect.particles.get(p);
+                particle.age += delta;
+                particle.x += particle.velocityX * delta;
+                particle.y += particle.velocityY * delta;
+                float drag = Math.max(0f, 1f - delta * 1.8f);
+                particle.velocityX *= drag;
+                particle.velocityY *= drag;
+            }
+
             if (effect.age >= effect.duration) expired.add(entity);
         }
+
         for (int i = 0; i < expired.size; i++) engine.removeEntity(expired.get(i));
     }
 }
