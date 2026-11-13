@@ -9,5 +9,6 @@ java {
 
 dependencies {
     api 'com.badlogicgames.gdx:gdx:1.13.1'
+    api 'com.badlogicgames.gdx:gdx-freetype:1.13.1'
     api 'com.badlogicgames.ashley:ashley:1.7.4'
 }
