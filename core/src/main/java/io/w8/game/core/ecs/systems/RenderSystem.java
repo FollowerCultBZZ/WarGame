@@ -301,12 +301,12 @@ public class RenderSystem extends EntitySystem {
             }
             if (player.fireRateOverdriveTimer > 0f) {
                 font.draw(batch, "FIRE RATE OVERDRIVE x3.5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
-                        32f, statusY);
+                        44f, statusY);
                 statusY -= 30f;
             }
             if (player.multiShotOverdriveTimer > 0f) {
                 font.draw(batch, "DOUBLE SHOTS  " + (int) Math.ceil(player.multiShotOverdriveTimer) + "s",
-                        32f, statusY);
+                        44f, statusY);
                 statusY -= 30f;
             }
             if (player.homingLevels > 0) {
