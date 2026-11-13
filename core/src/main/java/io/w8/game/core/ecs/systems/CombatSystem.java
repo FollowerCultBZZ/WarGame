@@ -60,6 +60,7 @@ public class CombatSystem extends EntitySystem {
                 continue;
             }
 
+            boolean hit = false;
             for (int j = 0; j < enemies.size(); j++) {
                 Entity enemyEntity = enemies.get(j);
                 if (remove.contains(enemyEntity, true)) continue;
@@ -67,22 +68,37 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = shotTransform.x - enemyTransform.x;
                 float dy = shotTransform.y - enemyTransform.y;
-                float radius = enemy.radius + (projectile.rocket ? 13f : 8f);
+                float hitRadius = enemy.radius + (projectile.rocket ? 13f : 8f);
 
-                if (dx * dx + dy * dy <= radius * radius) {
-                    enemy.health -= projectile.damage;
-                    factory.createEffect(shotTransform.x, shotTransform.y, 1f, 0.55f, 0.2f, projectile.rocket ? 25f : 12f);
-                    if (enemy.health <= 0f) {
-                        remove.add(enemyEntity);
-                        if (players.size() > 0) {
-                            PlayerComponent scorer = players.first().getComponent(PlayerComponent.class);
-                            scorer.score += enemy.kind == 1 ? 400 : enemy.kind == 0 ? 275 : 200;
-                        }
-                        factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.25f, 0.18f, enemy.radius * 1.8f);
-                        if (MathUtils.randomBoolean(0.42f)) {
-                            factory.createPickup(enemyTransform.x, enemyTransform.y, MathUtils.random(0, 5));
+                if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+                    hit = true;
+                    float splash = projectile.splashRadius;
+                    for (int k = 0; k < enemies.size(); k++) {
+                        Entity affected = enemies.get(k);
+                        if (remove.contains(affected, true)) continue;
+                        TransformComponent affectedTransform = affected.getComponent(TransformComponent.class);
+                        EnemyComponent affectedEnemy = affected.getComponent(EnemyComponent.class);
+                        float sx = affectedTransform.x - shotTransform.x;
+                        float sy = affectedTransform.y - shotTransform.y;
+                        boolean inBlast = splash > 0f && sx * sx + sy * sy <= splash * splash;
+                        if (affected != enemyEntity && !inBlast) continue;
+                        affectedEnemy.health -= projectile.damage;
+                        if (affectedEnemy.health <= 0f) {
+                            remove.add(affected);
+                            if (players.size() > 0) {
+                                PlayerComponent scorer = players.first().getComponent(PlayerComponent.class);
+                                scorer.score += affectedEnemy.kind == 1 ? 400 : affectedEnemy.kind == 0 ? 275 : 200;
+                            }
+                            factory.createEffect(affectedTransform.x, affectedTransform.y,
+                                    1f, 0.25f, 0.18f, affectedEnemy.radius * 1.8f);
+                            if (MathUtils.randomBoolean(0.42f)) {
+                                factory.createPickup(affectedTransform.x, affectedTransform.y,
+                                        MathUtils.random(0, 5));
+                            }
                         }
                     }
+                    factory.createEffect(shotTransform.x, shotTransform.y,
+                            1f, 0.55f, 0.2f, splash > 0f ? splash : 12f);
                     if (projectile.pierceRemaining > 0) projectile.pierceRemaining--;
                     else remove.add(shot);
                     break;
