@@ -11,6 +11,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.GameFonts;
@@ -37,7 +41,11 @@ public class RenderSystem extends EntitySystem {
     private final TextureRegion reloadIcon;
     private final TextureRegion countIcon;
     private final Animation<TextureRegion> fireAnimation;
-    private final Animation<TextureRegion> shieldAnimation;
+    private final TextureRegion shieldRegion;
+    private final TextureRegion buttonUp;
+    private final Texture backgroundTexture;
+    private final ShaderProgram shieldShader;
+    private final GlyphLayout layout = new GlyphLayout();
     private float animationTime;
     private final OrthographicCamera camera;
     private final Arena arena;
@@ -57,15 +65,43 @@ public class RenderSystem extends EntitySystem {
         missileIcon = atlas.findRegion("missile-icon");
         reloadIcon = atlas.findRegion("reload-icon");
         countIcon = atlas.findRegion("count-icon");
+        shieldRegion = atlas.findRegion("shield");
+        buttonUp = atlas.findRegion("button-up");
+        backgroundTexture = new Texture(Gdx.files.internal("background.jpg"));
+        backgroundTexture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         font = GameFonts.create(24);
+
+        String vertexShader =
+                "attribute vec4 a_position;\n" +
+                "attribute vec4 a_color;\n" +
+                "attribute vec2 a_texCoord0;\n" +
+                "uniform mat4 u_projTrans;\n" +
+                "varying vec4 v_color;\n" +
+                "varying vec2 v_texCoords;\n" +
+                "void main(){ v_color=a_color; v_color.a*=255.0/254.0; " +
+                "v_texCoords=a_texCoord0; gl_Position=u_projTrans*a_position; }";
+        String fragmentShader =
+                "#ifdef GL_ES\nprecision mediump float;\n#endif\n" +
+                "varying vec4 v_color;\n" +
+                "varying vec2 v_texCoords;\n" +
+                "uniform sampler2D u_texture;\n" +
+                "uniform float u_time;\n" +
+                "void main(){\n" +
+                " vec4 tex=texture2D(u_texture,v_texCoords);\n" +
+                " float wave=0.5+0.5*sin(u_time*3.2+v_texCoords.y*17.0+v_texCoords.x*9.0);\n" +
+                " float sweep=1.0-smoothstep(0.0,0.16,abs(fract((v_texCoords.x+v_texCoords.y)*1.35-u_time*0.22)-0.5));\n" +
+                " vec3 tint=mix(vec3(0.18,0.68,1.0),vec3(0.72,0.96,1.0),wave);\n" +
+                " vec3 color=tex.rgb*tint*(0.82+wave*0.28+sweep*0.42);\n" +
+                " gl_FragColor=vec4(color,tex.a*v_color.a*0.84);\n" +
+                "}";
+        shieldShader = new ShaderProgram(vertexShader, fragmentShader);
+        if (!shieldShader.isCompiled()) {
+            throw new IllegalStateException("Shield shader compilation failed: " + shieldShader.getLog());
+        }
 
         Array<TextureRegion> fireFrames = new Array<>();
         fireFrames.addAll(atlas.findRegions("fire"));
         fireAnimation = new Animation<>(0.075f, fireFrames, Animation.PlayMode.LOOP);
-
-        Array<TextureRegion> shieldFrames = new Array<>();
-        shieldFrames.addAll(atlas.findRegions("shield"));
-        shieldAnimation = new Animation<>(0.11f, shieldFrames, Animation.PlayMode.LOOP);
     }
 
     @Override
@@ -78,6 +114,17 @@ public class RenderSystem extends EntitySystem {
 
     public void render() {
         animationTime += Math.min(Gdx.graphics.getDeltaTime(), 0.05f);
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        float bgScale = Math.max(arena.getWidth() / backgroundTexture.getWidth(),
+                arena.getHeight() / backgroundTexture.getHeight());
+        float bgWidth = backgroundTexture.getWidth() * bgScale;
+        float bgHeight = backgroundTexture.getHeight() * bgScale;
+        batch.draw(backgroundTexture, (arena.getWidth() - bgWidth) * 0.5f,
+                (arena.getHeight() - bgHeight) * 0.5f, bgWidth, bgHeight);
+        batch.end();
+
         renderer.setProjectionMatrix(camera.combined);
         renderer.begin(ShapeRenderer.ShapeType.Line);
         renderer.setColor(0.2f, 0.45f, 0.65f, 1f);
@@ -144,8 +191,8 @@ public class RenderSystem extends EntitySystem {
         if (players.size() > 0) {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
             float ratio = Math.max(0f, Math.min(1f, player.health / player.maxHealth));
-            float x = 20f;
-            float y = arena.getHeight() - 34f;
+            float x = 32f;
+            float y = arena.getHeight() - 52f;
             float width = 190f;
             float height = 13f;
             renderer.setColor(0.08f, 0.1f, 0.16f, 0.95f);
@@ -161,7 +208,7 @@ public class RenderSystem extends EntitySystem {
             if (enemy.kind != 3) continue;
             float ratio = Math.max(0f, Math.min(1f, enemy.health / enemy.maxHealth));
             float x = arena.getWidth() * 0.18f;
-            float y = arena.getHeight() - 70f;
+            float y = arena.getHeight() - 112f;
             float width = arena.getWidth() * 0.64f;
             renderer.setColor(0.12f, 0.04f, 0.06f, 1f);
             renderer.rect(x, y, width, 18f);
@@ -196,8 +243,10 @@ public class RenderSystem extends EntitySystem {
                     playerWidth, playerHeight, rotation);
 
             if (player.invulnerabilityTimer > 0f) {
-                TextureRegion shield = shieldAnimation.getKeyFrame(animationTime);
-                drawCentered(shield, transform.x, transform.y, 88f, 88f, rotation);
+                batch.setShader(shieldShader);
+                shieldShader.setUniformf("u_time", animationTime);
+                drawCentered(shieldRegion, transform.x, transform.y, 88f, 88f, rotation);
+                batch.setShader(null);
             }
         }
 
@@ -232,30 +281,53 @@ public class RenderSystem extends EntitySystem {
         if (players.size() > 0) {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
             font.getData().setScale(1.1f);
-            font.draw(batch, "SCORE " + player.score, arena.getWidth() - 175f, arena.getHeight() - 22f);
-            font.draw(batch, "LIVES " + player.lives, 20f, arena.getHeight() - 58f);
+            String scoreText = "SCORE " + player.score;
+            layout.setText(font, scoreText);
+            font.draw(batch, scoreText, arena.getWidth() - layout.width - 32f,
+                    arena.getHeight() - 38f);
+            font.draw(batch, "LIVES " + player.lives, 32f, arena.getHeight() - 82f);
+            float statusY = arena.getHeight() - 116f;
             if (player.invulnerabilityTimer > 0f) {
                 font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
-                        20f, arena.getHeight() - 82f);
+                        32f, statusY);
+                statusY -= 30f;
             }
             if (player.fireRateOverdriveTimer > 0f) {
-                font.draw(batch, "FIRE RATE +250%  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
-                        20f, arena.getHeight() - 106f);
+                font.draw(batch, "FIRE RATE x5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
+                        32f, statusY);
+                statusY -= 30f;
             }
             if (player.multiShotOverdriveTimer > 0f) {
                 font.draw(batch, "DOUBLE SHOTS  " + (int) Math.ceil(player.multiShotOverdriveTimer) + "s",
-                        20f, arena.getHeight() - 130f);
+                        32f, statusY);
+                statusY -= 30f;
             }
             if (player.homingLevels > 0) {
                 font.draw(batch, "ROCKET RATE x" + String.format(java.util.Locale.US, "%.2f",
-                        player.rocketFireRateMultiplier), 20f, arena.getHeight() - 154f);
+                        player.rocketFireRateMultiplier), 32f, statusY);
             }
             if (player.dead) {
                 font.getData().setScale(3f);
-                font.draw(batch, "GAME OVER", arena.getWidth() * 0.5f - 100f, arena.getHeight() * 0.5f + 18f);
+                String gameOver = "GAME OVER";
+                layout.setText(font, gameOver);
+                font.draw(batch, gameOver, (arena.getWidth() - layout.width) * 0.5f,
+                        arena.getHeight() * 0.5f + 115f);
                 font.getData().setScale(1.5f);
-                font.draw(batch, "FINAL SCORE " + player.score, arena.getWidth() * 0.5f - 95f,
-                        arena.getHeight() * 0.5f - 25f);
+                String finalScore = "FINAL SCORE " + player.score;
+                layout.setText(font, finalScore);
+                font.draw(batch, finalScore, (arena.getWidth() - layout.width) * 0.5f,
+                        arena.getHeight() * 0.5f + 48f);
+
+                float buttonWidth = 360f;
+                float buttonHeight = 100f;
+                float buttonX = (arena.getWidth() - buttonWidth) * 0.5f;
+                float buttonY = arena.getHeight() * 0.5f - 170f;
+                batch.draw(buttonUp, buttonX, buttonY, buttonWidth, buttonHeight);
+                font.getData().setScale(1.6f);
+                layout.setText(font, "RESTART");
+                font.draw(batch, "RESTART",
+                        (arena.getWidth() - layout.width) * 0.5f,
+                        buttonY + (buttonHeight + layout.height) * 0.5f);
             }
         }
         for (int i = 0; i < enemies.size(); i++) {
@@ -263,7 +335,7 @@ public class RenderSystem extends EntitySystem {
             if (enemy.kind == 3) {
                 font.getData().setScale(1.05f);
                 font.draw(batch, "BOSS " + enemy.bossNumber + "  STAGE " + enemy.bossStage,
-                        arena.getWidth() * 0.18f, arena.getHeight() - 47f);
+                        arena.getWidth() * 0.18f, arena.getHeight() - 88f);
             }
         }
         batch.end();
@@ -289,6 +361,8 @@ public class RenderSystem extends EntitySystem {
 
     public void dispose() {
         atlas.dispose();
+        backgroundTexture.dispose();
+        shieldShader.dispose();
         renderer.dispose();
         batch.dispose();
         font.dispose();
