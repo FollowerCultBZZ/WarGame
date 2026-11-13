@@ -170,9 +170,9 @@ public class RenderSystem extends EntitySystem {
                 float blue;
                 if (progress < 0.48f) {
                     float t = progress / 0.48f;
-                    red = 1f;
-                    green = MathUtils.lerp(0.94f, 0.34f, t);
-                    blue = MathUtils.lerp(0.12f, 0.035f, t);
+                    red = MathUtils.lerp(effect.startRed, 1f, t);
+                    green = MathUtils.lerp(effect.startGreen, 0.34f, t);
+                    blue = MathUtils.lerp(effect.startBlue, 0.035f, t);
                 } else {
                     float t = (progress - 0.48f) / 0.52f;
                     red = MathUtils.lerp(1f, 0.42f, t);
