@@ -60,6 +60,7 @@ public class MenuScreen extends ScreenAdapter {
                 int releasedButton = hitButton(point.x, point.y);
                 if (pressedButton != -1 && pressedButton == releasedButton) {
                     if (pressedButton == 0) {
+                        MenuScreen.this.dispose();
                         game.setScreen(new GameScreen());
                     } else if (pressedButton == 1) {
                         Gdx.app.exit();
@@ -98,7 +99,6 @@ public class MenuScreen extends ScreenAdapter {
         drawButton(0, PLAY_Y, "PLAY");
         drawButton(1, EXIT_Y, "EXIT");
 
-        layout.setText(buttonFont, "TAP TO MOVE  •  DOUBLE TAP: ULTIMATE");
         buttonFont.getData().setScale(0.65f);
         layout.setText(buttonFont, "TAP TO MOVE  •  DOUBLE TAP: ULTIMATE");
         buttonFont.draw(batch, layout, (WORLD_WIDTH - layout.width) * 0.5f, 300f);
