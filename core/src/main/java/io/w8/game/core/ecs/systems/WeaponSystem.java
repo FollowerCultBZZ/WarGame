@@ -33,12 +33,17 @@ public class WeaponSystem extends EntitySystem {
             TransformComponent transform = player.getComponent(TransformComponent.class);
             PlayerComponent stats = player.getComponent(PlayerComponent.class);
             WeaponComponent weapon = player.getComponent(WeaponComponent.class);
+            stats.fireRateOverdriveTimer = Math.max(0f, stats.fireRateOverdriveTimer - delta);
+            stats.multiShotOverdriveTimer = Math.max(0f, stats.multiShotOverdriveTimer - delta);
             if (stats.dead) continue;
 
+            float fireRate = stats.fireRateMultiplier
+                    * (stats.fireRateOverdriveTimer > 0f ? 2.5f : 1f);
             weapon.fireTimer -= delta;
             if (weapon.fireTimer <= 0f) {
-                weapon.fireTimer = weapon.fireInterval / stats.fireRateMultiplier;
+                weapon.fireTimer = weapon.fireInterval / fireRate;
                 int count = 1 + stats.extraProjectiles;
+                if (stats.multiShotOverdriveTimer > 0f) count *= 2;
                 for (int shot = 0; shot < count; shot++) {
                     float offset = (shot - (count - 1) * 0.5f) * 13f;
                     factory.createProjectile(transform.x, transform.y + 32f, offset,
