@@ -91,7 +91,7 @@ public class EntityFactory {
         Entity entity = engine.createEntity();
         ShapeComponent shape = new ShapeComponent();
         shape.type = type <= PickupComponent.HEAL
-                ? ShapeComponent.CIRCLE : ShapeComponent.RECTANGLE;
+                ? ShapeComponent.CIRCLE : ShapeComponent.SQUARE;
         shape.radius = 12f;
 
         if (type == PickupComponent.SPEED) {
