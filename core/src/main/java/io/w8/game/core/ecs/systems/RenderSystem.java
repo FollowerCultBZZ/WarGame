@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.ecs.effects.ParticleRenderer;
 import io.w8.game.core.GameFonts;
+import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.ProjectileComponent;
