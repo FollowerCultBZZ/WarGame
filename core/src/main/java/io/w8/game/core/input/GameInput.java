@@ -9,6 +9,8 @@ public class GameInput extends InputAdapter {
     private final Vector2 pointerWorld = new Vector2();
     private boolean pointerDown;
     private boolean ultimatePressed;
+    private boolean gameOver;
+    private boolean restartPressed;
     private long lastTapTime;
     private int lastTapX;
     private int lastTapY;
@@ -20,6 +22,12 @@ public class GameInput extends InputAdapter {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
+        updatePointer(screenX, screenY);
+        if (gameOver) {
+            restartPressed = isInsideRestartButton(pointerWorld.x, pointerWorld.y);
+            pointerDown = false;
+            return true;
+        }
         long now = System.currentTimeMillis();
         int tapDx = screenX - lastTapX;
         int tapDy = screenY - lastTapY;
@@ -32,7 +40,6 @@ public class GameInput extends InputAdapter {
             lastTapX = screenX;
             lastTapY = screenY;
         }
-        updatePointer(screenX, screenY);
         pointerDown = true;
         return true;
     }
@@ -47,7 +54,7 @@ public class GameInput extends InputAdapter {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
-        updatePointer(screenX, screenY);
+        if (!gameOver) updatePointer(screenX, screenY);
         pointerDown = false;
         return true;
     }
@@ -55,6 +62,26 @@ public class GameInput extends InputAdapter {
     private void updatePointer(int screenX, int screenY) {
         pointerWorld.set(screenX, screenY);
         viewport.unproject(pointerWorld);
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+        if (!gameOver) restartPressed = false;
+    }
+
+    public boolean consumeRestartPressed() {
+        boolean pressed = restartPressed;
+        restartPressed = false;
+        return pressed;
+    }
+
+    private boolean isInsideRestartButton(float x, float y) {
+        float width = 360f;
+        float height = 100f;
+        float left = (viewport.getWorldWidth() - width) * 0.5f;
+        float bottom = viewport.getWorldHeight() * 0.5f - 170f;
+        return x >= left && x <= left + width
+                && y >= bottom && y <= bottom + height;
     }
 
     public boolean consumeUltimatePressed() {
