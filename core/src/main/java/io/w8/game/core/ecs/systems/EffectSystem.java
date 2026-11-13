@@ -27,21 +27,27 @@ public class EffectSystem extends EntitySystem {
         for (int i = 0; i < effects.size(); i++) {
             Entity entity = effects.get(i);
             EffectComponent effect = entity.getComponent(EffectComponent.class);
-            effect.age += delta;
 
-            for (int p = 0; p < effect.particles.size; p++) {
+            for (int p = effect.particles.size - 1; p >= 0; p--) {
                 EffectComponent.Particle particle = effect.particles.get(p);
                 particle.age += delta;
                 particle.x += particle.velocityX * delta;
                 particle.y += particle.velocityY * delta;
-                float drag = Math.max(0f, 1f - delta * 1.8f);
-                particle.velocityX *= drag;
-                particle.velocityY *= drag;
+
+                float damping = Math.max(0f, 1f - particle.drag * delta);
+                particle.velocityX *= damping;
+                particle.velocityY *= damping;
+
+                if (particle.age >= particle.lifetime) {
+                    effect.particles.removeIndex(p);
+                }
             }
 
-            if (effect.age >= effect.duration) expired.add(entity);
+            if (effect.particles.size == 0) expired.add(entity);
         }
 
-        for (int i = 0; i < expired.size; i++) engine.removeEntity(expired.get(i));
+        for (int i = 0; i < expired.size; i++) {
+            engine.removeEntity(expired.get(i));
+        }
     }
 }
