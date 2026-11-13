@@ -9,7 +9,6 @@ import io.w8.game.core.ecs.components.PickupComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.ecs.components.VelocityComponent;
-import io.w8.game.core.ecs.components.WeaponComponent;
 import io.w8.game.core.ecs.factories.EntityFactory;
 
 public class PickupSystem extends EntitySystem {
@@ -22,12 +21,19 @@ public class PickupSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         this.engine = engine;
         factory = new EntityFactory(engine);
-        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class, WeaponComponent.class).get());
+        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class).get());
         pickups = engine.getEntitiesFor(Family.all(PickupComponent.class, TransformComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
+        for (int i = 0; i < pickups.size(); i++) {
+            Entity pickup = pickups.get(i);
+            if (pickup.getComponent(TransformComponent.class).y < -30f) {
+                engine.removeEntity(pickup);
+            }
+        }
+
         for (int i = 0; i < players.size(); i++) {
             Entity playerEntity = players.get(i);
             PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);

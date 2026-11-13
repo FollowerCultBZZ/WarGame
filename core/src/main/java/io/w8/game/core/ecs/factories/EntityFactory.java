@@ -161,6 +161,7 @@ public class EntityFactory {
         projectile.damage = 3f;
         projectile.remainingLife = 4f;
         ShapeComponent shape = entity.getComponent(ShapeComponent.class);
+        shape.type = ShapeComponent.RECTANGLE;
         shape.radius = 13f;
         shape.red = 0.95f;
         shape.green = 0.35f;
