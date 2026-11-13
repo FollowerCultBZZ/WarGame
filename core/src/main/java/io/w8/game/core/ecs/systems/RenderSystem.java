@@ -184,7 +184,7 @@ public class RenderSystem extends EntitySystem {
                         20f, arena.getHeight() - 82f);
             }
             if (player.fireRateOverdriveTimer > 0f) {
-                font.draw(batch, "FIRE RATE x3.5  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
+                font.draw(batch, "FIRE RATE +250%  " + (int) Math.ceil(player.fireRateOverdriveTimer) + "s",
                         20f, arena.getHeight() - 106f);
             }
             if (player.multiShotOverdriveTimer > 0f) {
