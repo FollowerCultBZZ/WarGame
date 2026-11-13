@@ -47,7 +47,7 @@ public class PlayerControlSystem extends EntitySystem {
                 }
             }
 
-            float maxChange = velocity.acceleration * delta * (input.isPointerDown() ? 1f : 1.45f);
+            float maxChange = velocity.acceleration * delta * (input.isPointerDown() ? 1.25f : 2.6f);
             velocity.x = approach(velocity.x, desiredX, maxChange);
             velocity.y = approach(velocity.y, desiredY, maxChange);
             if (!input.isPointerDown() && Math.abs(velocity.x) + Math.abs(velocity.y) < 8f) {
