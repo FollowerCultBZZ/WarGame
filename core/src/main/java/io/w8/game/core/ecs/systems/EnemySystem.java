@@ -64,8 +64,8 @@ public class EnemySystem extends EntitySystem {
             int kind = roll < 30 ? 0 : roll < 62 ? 1 : 2;
             float x = MathUtils.random(38f, Math.max(39f, arena.getWidth() - 38f));
             factory.createEnemy(x, arena.getHeight() - 38f, kind, difficulty);
-            float baseInterval = 1.85f - difficulty * 0.052f;
-            spawnTimer = Math.max(0.32f, baseInterval);
+            float baseInterval = 1.12f - difficulty * 0.026f;
+            spawnTimer = Math.max(0.22f, baseInterval);
         } else if (enemies.size() >= maxEnemies) {
             spawnTimer = Math.min(spawnTimer, 0.35f);
         }
