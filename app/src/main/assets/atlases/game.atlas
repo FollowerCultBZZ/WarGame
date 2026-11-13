@@ -6,37 +6,72 @@ filter: Nearest, Nearest
 repeat: none
 bullet
   rotate: false
-  xy: 289, 81
+  xy: 67, 7
   size: 4, 8
   orig: 4, 8
   offset: 0, 0
   index: -1
+button-down
+  rotate: false
+  xy: 289, 89
+  size: 48, 32
+  orig: 48, 32
+  offset: 0, 0
+  index: -1
+button-up
+  rotate: false
+  xy: 67, 17
+  size: 48, 32
+  orig: 48, 32
+  offset: 0, 0
+  index: -1
+count-icon
+  rotate: false
+  xy: 339, 105
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 fire
   rotate: false
-  xy: 67, 33
+  xy: 117, 33
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 fire
   rotate: false
-  xy: 301, 105
+  xy: 301, 71
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 fire
   rotate: false
-  xy: 67, 15
+  xy: 357, 105
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
+health-icon
+  rotate: false
+  xy: 135, 33
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 missile
   rotate: false
-  xy: 289, 91
+  xy: 289, 57
   size: 10, 30
   orig: 10, 30
+  offset: 0, 0
+  index: -1
+missile-icon
+  rotate: false
+  xy: 319, 71
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 player
@@ -44,6 +79,13 @@ player
   xy: 1, 1
   size: 64, 48
   orig: 64, 48
+  offset: 0, 0
+  index: -1
+reload-icon
+  rotate: false
+  xy: 375, 105
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1
 shield
