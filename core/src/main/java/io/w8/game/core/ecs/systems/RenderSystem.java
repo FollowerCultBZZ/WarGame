@@ -4,22 +4,36 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
+import io.w8.game.core.ecs.components.ProjectileComponent;
 import io.w8.game.core.ecs.components.PickupComponent;
 import io.w8.game.core.ecs.components.ShapeComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
+import io.w8.game.core.ecs.components.VelocityComponent;
 import io.w8.game.core.world.Arena;
 
 public class RenderSystem extends EntitySystem {
     private final ShapeRenderer renderer = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
     private final BitmapFont font = new BitmapFont();
+    private final TextureAtlas atlas;
+    private final TextureRegion playerRegion;
+    private final TextureRegion bulletRegion;
+    private final TextureRegion missileRegion;
+    private final Animation<TextureRegion> fireAnimation;
+    private final Animation<TextureRegion> shieldAnimation;
+    private float animationTime;
     private final OrthographicCamera camera;
     private final Arena arena;
     private ImmutableArray<Entity> entities;
@@ -30,6 +44,22 @@ public class RenderSystem extends EntitySystem {
     public RenderSystem(OrthographicCamera camera, Arena arena) {
         this.camera = camera;
         this.arena = arena;
+        atlas = new TextureAtlas(Gdx.files.internal("atlases/game.atlas"));
+        playerRegion = atlas.findRegion("player");
+        bulletRegion = atlas.findRegion("bullet");
+        missileRegion = atlas.findRegion("missile");
+
+        Array<TextureRegion> fireFrames = new Array<>();
+        for (int i = 0; i < 3; i++) {
+            fireFrames.add(atlas.findRegion("fire_" + i));
+        }
+        fireAnimation = new Animation<>(0.075f, fireFrames, Animation.PlayMode.LOOP);
+
+        Array<TextureRegion> shieldFrames = new Array<>();
+        for (int i = 0; i < 4; i++) {
+            shieldFrames.add(atlas.findRegion("shield_" + i));
+        }
+        shieldAnimation = new Animation<>(0.11f, shieldFrames, Animation.PlayMode.LOOP);
     }
 
     @Override
@@ -41,6 +71,7 @@ public class RenderSystem extends EntitySystem {
     }
 
     public void render() {
+        animationTime += Math.min(Gdx.graphics.getDeltaTime(), 0.05f);
         renderer.setProjectionMatrix(camera.combined);
         renderer.begin(ShapeRenderer.ShapeType.Line);
         renderer.setColor(0.2f, 0.45f, 0.65f, 1f);
@@ -77,21 +108,14 @@ public class RenderSystem extends EntitySystem {
             renderer.setColor(effect.red, effect.green, effect.blue, 1f - progress);
             renderer.circle(transform.x, transform.y, radius, 24);
         }
-        for (int i = 0; i < players.size(); i++) {
-            Entity playerEntity = players.get(i);
-            PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
-            if (player.invulnerabilityTimer > 0f) {
-                TransformComponent transform = playerEntity.getComponent(TransformComponent.class);
-                renderer.setColor(0.25f, 0.9f, 1f, 1f);
-                renderer.circle(transform.x, transform.y, 39f, 32);
-            }
-        }
         renderer.end();
 
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
-            if (entity.getComponent(PickupComponent.class) != null) continue;
+            if (entity.getComponent(PickupComponent.class) != null
+                    || entity.getComponent(PlayerComponent.class) != null
+                    || entity.getComponent(ProjectileComponent.class) != null) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             ShapeComponent shape = entity.getComponent(ShapeComponent.class);
             renderer.setColor(shape.red, shape.green, shape.blue, 1f);
@@ -155,6 +179,46 @@ public class RenderSystem extends EntitySystem {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+
+        for (int i = 0; i < players.size(); i++) {
+            Entity entity = players.get(i);
+            PlayerComponent player = entity.getComponent(PlayerComponent.class);
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
+            float rotation = transform.rotation;
+            float radians = (float) Math.toRadians(rotation);
+            float speed = (float) Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+
+            if (speed > 45f && !player.dead) {
+                TextureRegion flame = fireAnimation.getKeyFrame(animationTime);
+                float flameX = transform.x + (float) Math.sin(radians) * 30f;
+                float flameY = transform.y - (float) Math.cos(radians) * 30f;
+                drawCentered(flame, flameX, flameY, 20f, 28f, rotation);
+            }
+
+            if (player.invulnerabilityTimer > 0f) {
+                TextureRegion shield = shieldAnimation.getKeyFrame(animationTime);
+                drawCentered(shield, transform.x, transform.y, 88f, 88f, rotation);
+            }
+
+            float playerHeight = 64f;
+            float playerWidth = playerHeight * playerRegion.getRegionWidth()
+                    / (float) playerRegion.getRegionHeight();
+            drawCentered(playerRegion, transform.x, transform.y,
+                    playerWidth, playerHeight, rotation);
+        }
+
+        for (int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
+            ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
+            if (projectile == null) continue;
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            TextureRegion region = projectile.rocket ? missileRegion : bulletRegion;
+            float height = projectile.rocket ? 32f : 19f;
+            float width = height * region.getRegionWidth() / (float) region.getRegionHeight();
+            drawCentered(region, transform.x, transform.y, width, height, transform.rotation);
+        }
+
         font.setColor(1f, 1f, 1f, 1f);
         font.getData().setScale(1.15f);
         for (int i = 0; i < entities.size(); i++) {
@@ -214,7 +278,16 @@ public class RenderSystem extends EntitySystem {
         batch.end();
     }
 
+    private void drawCentered(TextureRegion region, float centerX, float centerY,
+                              float width, float height, float rotation) {
+        batch.draw(region,
+                centerX - width * 0.5f, centerY - height * 0.5f,
+                width * 0.5f, height * 0.5f,
+                width, height, 1f, 1f, rotation);
+    }
+
     public void dispose() {
+        atlas.dispose();
         renderer.dispose();
         batch.dispose();
         font.dispose();
