@@ -7,11 +7,13 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameInput extends InputAdapter {
     private final Viewport viewport;
     private final Vector2 pointerWorld = new Vector2();
-    private final Vector2 pointerOrigin = new Vector2();
+    private final Vector2 lastPointerWorld = new Vector2();
     private boolean pointerDown;
     private boolean ultimatePressed;
     private boolean gameOver;
     private boolean restartPressed;
+    private float pendingDragX;
+    private float pendingDragY;
     private long lastTapTime;
     private int lastTapX;
     private int lastTapY;
@@ -24,12 +26,16 @@ public class GameInput extends InputAdapter {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
         updatePointer(screenX, screenY);
-        pointerOrigin.set(pointerWorld);
+        lastPointerWorld.set(pointerWorld);
+        pendingDragX = 0f;
+        pendingDragY = 0f;
+
         if (gameOver) {
             restartPressed = isInsideRestartButton(pointerWorld.x, pointerWorld.y);
             pointerDown = false;
             return true;
         }
+
         long now = System.currentTimeMillis();
         int tapDx = screenX - lastTapX;
         int tapDy = screenY - lastTapY;
@@ -42,6 +48,7 @@ public class GameInput extends InputAdapter {
             lastTapX = screenX;
             lastTapY = screenY;
         }
+
         pointerDown = true;
         return true;
     }
@@ -49,21 +56,40 @@ public class GameInput extends InputAdapter {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (pointer != 0 || !pointerDown) return false;
-        updatePointer(screenX, screenY);
+        accumulateDrag(screenX, screenY);
         return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
-        if (!gameOver) updatePointer(screenX, screenY);
+        if (!gameOver && pointerDown) accumulateDrag(screenX, screenY);
         pointerDown = false;
         return true;
+    }
+
+    private void accumulateDrag(int screenX, int screenY) {
+        updatePointer(screenX, screenY);
+        pendingDragX += pointerWorld.x - lastPointerWorld.x;
+        pendingDragY += pointerWorld.y - lastPointerWorld.y;
+        lastPointerWorld.set(pointerWorld);
     }
 
     private void updatePointer(int screenX, int screenY) {
         pointerWorld.set(screenX, screenY);
         viewport.unproject(pointerWorld);
+    }
+
+    public float consumeDragDeltaX() {
+        float value = pendingDragX;
+        pendingDragX = 0f;
+        return value;
+    }
+
+    public float consumeDragDeltaY() {
+        float value = pendingDragY;
+        pendingDragY = 0f;
+        return value;
     }
 
     public void setGameOver(boolean gameOver) {
@@ -102,22 +128,5 @@ public class GameInput extends InputAdapter {
 
     public float getPointerY() {
         return pointerWorld.y;
-    }
-
-    public float getMoveX() {
-        return getJoystickAxis(pointerWorld.x - pointerOrigin.x);
-    }
-
-    public float getMoveY() {
-        return getJoystickAxis(pointerWorld.y - pointerOrigin.y);
-    }
-
-    private float getJoystickAxis(float offset) {
-        float deadZone = 8f;
-        float radius = 112f;
-        float distance = Math.abs(offset);
-        if (distance <= deadZone) return 0f;
-        float strength = Math.min(1f, (distance - deadZone) / (radius - deadZone));
-        return Math.signum(offset) * strength;
     }
 }
