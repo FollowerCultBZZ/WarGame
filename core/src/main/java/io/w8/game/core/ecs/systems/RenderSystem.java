@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import io.w8.game.core.GameFonts;
 import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.EnemyComponent;
@@ -156,18 +157,34 @@ public class RenderSystem extends EntitySystem {
             }
         }
 
-        for (int i = 0; i < effects.size(); i++) {
-            Entity entity = effects.get(i);
-            EffectComponent effect = entity.getComponent(EffectComponent.class);
-            TransformComponent transform = entity.getComponent(TransformComponent.class);
-            float progress = Math.min(1f, effect.age / effect.duration);
-            float radius = effect.radius * (0.35f + progress);
-            renderer.setColor(effect.red, effect.green, effect.blue, 1f - progress);
-            renderer.circle(transform.x, transform.y, radius, 24);
-        }
         renderer.end();
 
         renderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (int i = 0; i < effects.size(); i++) {
+            EffectComponent effect = effects.get(i).getComponent(EffectComponent.class);
+            for (int p = 0; p < effect.particles.size; p++) {
+                EffectComponent.Particle particle = effect.particles.get(p);
+                float progress = Math.min(1f, particle.age / particle.lifetime);
+                float red;
+                float green;
+                float blue;
+                if (progress < 0.48f) {
+                    float t = progress / 0.48f;
+                    red = 1f;
+                    green = MathUtils.lerp(0.94f, 0.34f, t);
+                    blue = MathUtils.lerp(0.12f, 0.035f, t);
+                } else {
+                    float t = (progress - 0.48f) / 0.52f;
+                    red = MathUtils.lerp(1f, 0.42f, t);
+                    green = MathUtils.lerp(0.34f, 0.45f, t);
+                    blue = MathUtils.lerp(0.035f, 0.48f, t);
+                }
+                float alpha = 1f - progress;
+                float size = particle.size * (1f - progress * 0.45f);
+                renderer.setColor(red, green, blue, alpha);
+                renderer.circle(particle.x, particle.y, size, 8);
+            }
+        }
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
@@ -233,7 +250,7 @@ public class RenderSystem extends EntitySystem {
             float radians = (float) Math.toRadians(rotation);
             float speed = (float) Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
 
-            if (speed > 45f && !player.dead) {
+            if (!player.dead) {
                 TextureRegion flame = fireAnimation.getKeyFrame(animationTime);
                 float flameX = transform.x + (float) Math.sin(radians) * 30f;
                 float flameY = transform.y - (float) Math.cos(radians) * 30f;
