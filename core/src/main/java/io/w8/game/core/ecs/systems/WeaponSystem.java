@@ -38,7 +38,7 @@ public class WeaponSystem extends EntitySystem {
             if (stats.dead) continue;
 
             float fireRate = stats.fireRateMultiplier
-                    * (stats.fireRateOverdriveTimer > 0f ? 3.5f : 1f);
+                    * (stats.fireRateOverdriveTimer > 0f ? 5f : 1f);
             weapon.fireTimer -= delta;
             if (weapon.fireTimer <= 0f) {
                 weapon.fireTimer = weapon.fireInterval / fireRate;
