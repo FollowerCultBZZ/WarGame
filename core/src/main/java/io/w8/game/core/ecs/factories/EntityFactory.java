@@ -6,6 +6,7 @@ import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.ShapeComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.ecs.components.VelocityComponent;
+import io.w8.game.core.ecs.components.WeaponComponent;
 
 public class EntityFactory {
     private final Engine engine;
@@ -32,6 +33,7 @@ public class EntityFactory {
         entity.add(transform);
         entity.add(velocity);
         entity.add(new PlayerComponent());
+        entity.add(new WeaponComponent());
         entity.add(shape);
 
         engine.addEntity(entity);
