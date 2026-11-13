@@ -61,7 +61,7 @@ public class MenuScreen extends ScreenAdapter {
                 if (pressedButton != -1 && pressedButton == releasedButton) {
                     if (pressedButton == 0) {
                         MenuScreen.this.dispose();
-                        game.setScreen(new GameScreen());
+                        game.setScreen(new GameScreen(game));
                     } else if (pressedButton == 1) {
                         Gdx.app.exit();
                     }
