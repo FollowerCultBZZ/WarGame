@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameInput extends InputAdapter {
     private final Viewport viewport;
     private final Vector2 pointerWorld = new Vector2();
+    private final Vector2 pointerOrigin = new Vector2();
     private boolean pointerDown;
     private boolean ultimatePressed;
     private boolean gameOver;
@@ -23,6 +24,7 @@ public class GameInput extends InputAdapter {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (pointer != 0) return false;
         updatePointer(screenX, screenY);
+        pointerOrigin.set(pointerWorld);
         if (gameOver) {
             restartPressed = isInsideRestartButton(pointerWorld.x, pointerWorld.y);
             pointerDown = false;
@@ -100,5 +102,22 @@ public class GameInput extends InputAdapter {
 
     public float getPointerY() {
         return pointerWorld.y;
+    }
+
+    public float getMoveX() {
+        return getJoystickAxis(pointerWorld.x - pointerOrigin.x);
+    }
+
+    public float getMoveY() {
+        return getJoystickAxis(pointerWorld.y - pointerOrigin.y);
+    }
+
+    private float getJoystickAxis(float offset) {
+        float deadZone = 8f;
+        float radius = 112f;
+        float distance = Math.abs(offset);
+        if (distance <= deadZone) return 0f;
+        float strength = Math.min(1f, (distance - deadZone) / (radius - deadZone));
+        return Math.signum(offset) * strength;
     }
 }
