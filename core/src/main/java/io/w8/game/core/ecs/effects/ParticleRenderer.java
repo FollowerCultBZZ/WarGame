@@ -1,5 +1,9 @@
 package io.w8.game.core.ecs.effects;
 
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import io.w8.game.core.ecs.components.EffectComponent;
@@ -11,11 +15,14 @@ public class ParticleRenderer {
         this.shapes = shapes;
     }
 
-    public void render(Iterable<EffectComponent> effects) {
+    public void render(ImmutableArray<Entity> entities) {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
-        for (EffectComponent effect : effects) {
-            for (int i = 0; i < effect.particles.size; i++) {
-                renderParticle(effect, effect.particles.get(i));
+        for (int i = 0; i < entities.size(); i++) {
+            EffectComponent effect = entities.get(i).getComponent(EffectComponent.class);
+            for (int p = 0; p < effect.particles.size; p++) {
+                renderParticle(effect, effect.particles.get(p));
             }
         }
         shapes.end();
