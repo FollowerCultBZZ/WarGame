@@ -52,7 +52,7 @@ public class PickupSystem extends EntitySystem {
                 float dy = playerTransform.y - pickupTransform.y;
                 ShapeComponent playerShape = playerEntity.getComponent(ShapeComponent.class);
                 ShapeComponent pickupShape = pickupEntity.getComponent(ShapeComponent.class);
-                float hitRadius = (playerShape == null ? 24f : playerShape.radius)
+                float hitRadius = (playerShape == null ? 28f : playerShape.radius)
                         + (pickupShape == null ? 13f : pickupShape.radius);
                 if (dx * dx + dy * dy > hitRadius * hitRadius) continue;
 
