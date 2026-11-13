@@ -248,7 +248,6 @@ public class RenderSystem extends EntitySystem {
             VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
             float rotation = transform.rotation;
             float radians = (float) Math.toRadians(rotation);
-            float speed = (float) Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
 
             if (!player.dead) {
                 TextureRegion flame = fireAnimation.getKeyFrame(animationTime);
