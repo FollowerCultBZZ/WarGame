@@ -63,7 +63,7 @@ public class CombatSystem extends EntitySystem {
                     TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
                     float dx = shotTransform.x - playerTransform.x;
                     float dy = shotTransform.y - playerTransform.y;
-                    float hitRadius = entityRadius(playerEntity, 24f) + entityRadius(shot, 7f);
+                    float hitRadius = entityRadius(playerEntity, 28f) + entityRadius(shot, 7f);
                     if (dx * dx + dy * dy <= hitRadius * hitRadius) {
                         if (player.invulnerabilityTimer <= 0f && player.damageCooldown <= 0f) {
                             damagePlayer(playerEntity, projectile.damage, 0.35f);
@@ -141,7 +141,7 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = playerTransform.x - enemyTransform.x;
                 float dy = playerTransform.y - enemyTransform.y;
-                float radius = enemy.radius + entityRadius(playerEntity, 24f);
+                float radius = enemy.radius + entityRadius(playerEntity, 28f);
                 if (dx * dx + dy * dy <= radius * radius) {
                     damagePlayer(playerEntity, enemy.contactDamage, 0.65f);
                     enemy.health -= 1f;
