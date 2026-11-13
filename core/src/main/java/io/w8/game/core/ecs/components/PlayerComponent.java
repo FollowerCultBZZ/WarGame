@@ -6,6 +6,8 @@ public class PlayerComponent implements Component {
     public float health = 100f;
     public float maxHealth = 100f;
     public float damageCooldown;
+    public float invulnerabilityTimer;
+    public int lives = 3;
     public int extraProjectiles;
     public int homingLevels;
     public int rocketCount = 1;
