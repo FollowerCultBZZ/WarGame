@@ -83,17 +83,66 @@ public class EnemySystem extends EntitySystem {
                 float laneY = arena.getHeight() * 0.86f;
                 velocity.x = MathUtils.sin(elapsed * 0.85f + enemy.strafePhase) * enemy.speed * 1.5f;
                 velocity.y = MathUtils.clamp((laneY - transform.y) * 2f, -enemy.speed * 0.4f, enemy.speed * 0.4f);
-                enemy.fireTimer -= delta;
-                if (enemy.fireTimer <= 0f) {
-                    float damage = 24f + difficulty * 0.7f;
-                    factory.createEnemyProjectile(transform.x - 25f, transform.y - enemy.radius,
-                            target.x - 110f, target.y, 430f + difficulty * 5f, damage);
-                    factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
-                            target.x, target.y, 460f + difficulty * 5f, damage);
-                    factory.createEnemyProjectile(transform.x + 25f, transform.y - enemy.radius,
-                            target.x + 110f, target.y, 430f + difficulty * 5f, damage);
-                    enemy.fireTimer = enemy.fireInterval;
+
+                if (enemy.bossStage == 1 && enemy.health <= enemy.maxHealth * 0.5f) {
+                    enemy.bossStage = 2;
+                    enemy.bossAttackTimer = 1.1f;
+                    enemy.bossRadialVolleyCount = 0;
+                    factory.createEffect(transform.x, transform.y, 1f, 0.12f, 0.25f, enemy.radius * 2.8f);
                 }
+
+                if (enemy.bossStage == 1) {
+                    if (enemy.bossPatternActiveTimer > 0f) {
+                        enemy.bossPatternActiveTimer -= delta;
+                        enemy.bossShotTimer -= delta;
+                        if (enemy.bossShotTimer <= 0f) {
+                            float angle = enemy.bossSweepAngle;
+                            float targetX = transform.x + MathUtils.cosDeg(angle) * 180f;
+                            float targetY = transform.y + MathUtils.sinDeg(angle) * 180f;
+                            factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
+                                    targetX, targetY, 560f, 13f + difficulty * 0.35f);
+                            enemy.bossShotTimer = 0.105f;
+                            enemy.bossSweepAngle += enemy.bossSweepDirection * 12f;
+                            if (enemy.bossSweepAngle >= 320f) {
+                                enemy.bossSweepAngle = 320f;
+                                enemy.bossSweepDirection = -1;
+                            } else if (enemy.bossSweepAngle <= 220f) {
+                                enemy.bossSweepAngle = 220f;
+                                enemy.bossSweepDirection = 1;
+                            }
+                        }
+                        if (enemy.bossPatternActiveTimer <= 0f) {
+                            enemy.bossPatternActiveTimer = 0f;
+                            enemy.bossAttackTimer = 1.65f;
+                        }
+                    } else {
+                        enemy.bossAttackTimer -= delta;
+                        if (enemy.bossAttackTimer <= 0f) {
+                            enemy.bossPatternActiveTimer = 2.1f;
+                            enemy.bossShotTimer = 0f;
+                        }
+                    }
+                } else {
+                    enemy.bossAttackTimer -= delta;
+                    if (enemy.bossAttackTimer <= 0f) {
+                        int bulletCount = 18;
+                        for (int bullet = 0; bullet < bulletCount; bullet++) {
+                            float angle = bullet * 360f / bulletCount;
+                            float targetX = transform.x + MathUtils.cosDeg(angle) * 160f;
+                            float targetY = transform.y + MathUtils.sinDeg(angle) * 160f;
+                            factory.createEnemyProjectile(transform.x, transform.y,
+                                    targetX, targetY, 430f, 15f + difficulty * 0.3f);
+                        }
+                        enemy.bossRadialVolleyCount++;
+                        if (enemy.bossRadialVolleyCount < 2) {
+                            enemy.bossAttackTimer = 0.62f;
+                        } else {
+                            enemy.bossRadialVolleyCount = 0;
+                            enemy.bossAttackTimer = 2.75f;
+                        }
+                    }
+                }
+
                 if (transform.x < enemy.radius || transform.x > arena.getWidth() - enemy.radius) {
                     velocity.x *= -1f;
                 }
