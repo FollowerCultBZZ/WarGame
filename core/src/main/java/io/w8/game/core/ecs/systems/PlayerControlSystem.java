@@ -13,6 +13,10 @@ import io.w8.game.core.input.GameInput;
 import io.w8.game.core.world.Arena;
 
 public class PlayerControlSystem extends EntitySystem {
+    private static final float FINGER_SPEED_FOR_MAX_INPUT = 380f;
+    private static final float PLAYER_ACCELERATION = 900f;
+    private static final float PLAYER_BRAKING = 1100f;
+
     private final GameInput input;
     private final Arena arena;
     private EntityFactory factory;
@@ -32,6 +36,9 @@ public class PlayerControlSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         float delta = Math.min(deltaTime, 0.05f);
+        float dragX = input.consumeDragDeltaX();
+        float dragY = input.consumeDragDeltaY();
+
         for (int i = 0; i < players.size(); i++) {
             Entity entity = players.get(i);
             TransformComponent transform = entity.getComponent(TransformComponent.class);
@@ -52,22 +59,22 @@ public class PlayerControlSystem extends EntitySystem {
                 player.ultimateCooldown = 22f;
             }
 
-            float moveX = input.isPointerDown() ? input.getMoveX() : 0f;
-            float moveY = input.isPointerDown() ? input.getMoveY() : 0f;
+            float moveX = dragX / delta / FINGER_SPEED_FOR_MAX_INPUT;
+            float moveY = dragY / delta / FINGER_SPEED_FOR_MAX_INPUT;
             float inputLength = (float) Math.sqrt(moveX * moveX + moveY * moveY);
             if (inputLength > 1f) {
                 moveX /= inputLength;
                 moveY /= inputLength;
+                inputLength = 1f;
             }
 
             float maxSpeed = velocity.maxSpeed * player.speedMultiplier;
             float desiredX = moveX * maxSpeed;
             float desiredY = moveY * maxSpeed;
-            float acceleration = velocity.acceleration * delta;
-            float maxChange = acceleration * (inputLength > 0f ? 1.65f : 1.9f);
+            float maxChange = (inputLength > 0.015f ? PLAYER_ACCELERATION : PLAYER_BRAKING) * delta;
             velocity.x = approach(velocity.x, desiredX, maxChange);
             velocity.y = approach(velocity.y, desiredY, maxChange);
-            if (inputLength == 0f && Math.abs(velocity.x) + Math.abs(velocity.y) < 8f) {
+            if (inputLength <= 0.015f && Math.abs(velocity.x) + Math.abs(velocity.y) < 5f) {
                 velocity.x = 0f;
                 velocity.y = 0f;
             }
