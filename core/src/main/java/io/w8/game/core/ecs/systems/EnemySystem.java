@@ -94,7 +94,6 @@ public class EnemySystem extends EntitySystem {
                             target.x + 110f, target.y, 430f + difficulty * 5f, damage);
                     enemy.fireTimer = enemy.fireInterval;
                 }
-                float halfWidth = arena.getWidth() * 0.5f - enemy.radius;
                 if (transform.x < enemy.radius || transform.x > arena.getWidth() - enemy.radius) {
                     velocity.x *= -1f;
                 }
