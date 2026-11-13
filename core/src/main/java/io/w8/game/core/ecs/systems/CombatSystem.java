@@ -76,7 +76,7 @@ public class CombatSystem extends EntitySystem {
                         remove.add(enemyEntity);
                         if (players.size() > 0) {
                             PlayerComponent scorer = players.first().getComponent(PlayerComponent.class);
-                            scorer.score += enemy.kind == 1 ? 250 : enemy.kind == 0 ? 175 : 125;
+                            scorer.score += enemy.kind == 1 ? 400 : enemy.kind == 0 ? 275 : 200;
                         }
                         factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.25f, 0.18f, enemy.radius * 1.8f);
                         if (MathUtils.randomBoolean(0.42f)) {
@@ -111,7 +111,8 @@ public class CombatSystem extends EntitySystem {
                     factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.15f, 0.12f, 30f);
                     if (enemy.health <= 0f) {
                         remove.add(enemyEntity);
-                        player.score += enemy.kind == 1 ? 250 : enemy.kind == 0 ? 175 : 125;
+                        player.score += enemy.kind == 1 ? 400 : enemy.kind == 0 ? 275 : 200;
+                        factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.3f, 0.12f, enemy.radius * 1.6f);
                     }
                     break;
                 }
