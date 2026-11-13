@@ -96,6 +96,7 @@ public class EntityFactory {
         Entity entity = engine.createEntity();
         EnemyComponent enemy = new EnemyComponent();
         enemy.kind = 3;
+        enemy.bossNumber = Math.max(1, scoreMilestone / 10000);
         enemy.maxHealth = 650f + (scoreMilestone / 10000) * 260f;
         enemy.health = enemy.maxHealth;
         enemy.speed = 125f + (scoreMilestone / 10000) * 8f;
