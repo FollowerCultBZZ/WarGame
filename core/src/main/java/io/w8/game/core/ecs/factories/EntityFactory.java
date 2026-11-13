@@ -248,6 +248,9 @@ public class EntityFactory {
     public void createEffect(float x, float y, float red, float green, float blue, float radius) {
         Entity entity = engine.createEntity();
         EffectComponent effect = new EffectComponent();
+        effect.startRed = red;
+        effect.startGreen = green;
+        effect.startBlue = blue;
         int particleCount = MathUtils.random(12, MathUtils.clamp((int) (radius * 0.45f), 16, 30));
         float speedScale = MathUtils.clamp(radius / 34f, 0.7f, 2.2f);
 
