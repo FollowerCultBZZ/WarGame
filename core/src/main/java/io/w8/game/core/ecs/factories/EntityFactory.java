@@ -102,7 +102,7 @@ public class EntityFactory {
         enemy.contactDamage = 65f;
         enemy.radius = 66f;
         enemy.fireInterval = Math.max(0.55f, 1.25f - (scoreMilestone / 10000) * 0.06f);
-        enemy.fireTimer = 0.8f;
+        enemy.bossAttackTimer = 1.2f;
         enemy.strafePhase = (float) (Math.random() * Math.PI * 2f);
 
         ShapeComponent shape = new ShapeComponent();
