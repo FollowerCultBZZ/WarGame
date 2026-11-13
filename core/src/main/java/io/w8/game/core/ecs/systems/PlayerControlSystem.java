@@ -22,30 +22,26 @@ public class PlayerControlSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
-        players = engine.getEntitiesFor(
-                Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class).get()
-        );
+        players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
         float delta = Math.min(deltaTime, 0.05f);
-
         for (int i = 0; i < players.size(); i++) {
             Entity entity = players.get(i);
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
+            PlayerComponent player = entity.getComponent(PlayerComponent.class);
 
             float desiredX = 0f;
             float desiredY = 0f;
-
             if (input.isPointerDown()) {
                 float dx = input.getPointerX() - transform.x;
                 float dy = input.getPointerY() - transform.y;
                 float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
                 if (distance > 5f) {
-                    float speed = Math.min(velocity.maxSpeed, distance * 4f);
+                    float speed = Math.min(velocity.maxSpeed * player.speedMultiplier, distance * 4f);
                     desiredX = dx / distance * speed;
                     desiredY = dy / distance * speed;
                 }
@@ -54,7 +50,6 @@ public class PlayerControlSystem extends EntitySystem {
             float maxChange = velocity.acceleration * delta;
             velocity.x = approach(velocity.x, desiredX, maxChange);
             velocity.y = approach(velocity.y, desiredY, maxChange);
-
             if (!input.isPointerDown() && Math.abs(velocity.x) + Math.abs(velocity.y) < 8f) {
                 velocity.x = 0f;
                 velocity.y = 0f;

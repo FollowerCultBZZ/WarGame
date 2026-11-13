@@ -2,7 +2,11 @@ package io.w8.game.core.ecs;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import io.w8.game.core.ecs.systems.CombatSystem;
+import io.w8.game.core.ecs.systems.EnemySystem;
+import io.w8.game.core.ecs.systems.HomingSystem;
 import io.w8.game.core.ecs.systems.MovementSystem;
+import io.w8.game.core.ecs.systems.PickupSystem;
 import io.w8.game.core.ecs.systems.PlayerControlSystem;
 import io.w8.game.core.ecs.systems.ProjectileSystem;
 import io.w8.game.core.ecs.systems.RenderSystem;
@@ -19,8 +23,12 @@ public class GameEngine {
         renderSystem = new RenderSystem(camera, arena);
 
         engine.addSystem(new PlayerControlSystem(input, arena));
+        engine.addSystem(new EnemySystem(arena));
         engine.addSystem(new WeaponSystem(engine));
+        engine.addSystem(new HomingSystem());
         engine.addSystem(new MovementSystem(arena));
+        engine.addSystem(new CombatSystem());
+        engine.addSystem(new PickupSystem());
         engine.addSystem(new ProjectileSystem(arena));
         engine.addSystem(renderSystem);
     }

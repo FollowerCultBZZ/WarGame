@@ -23,33 +23,26 @@ public class ProjectileSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         this.engine = engine;
-        projectiles = engine.getEntitiesFor(
-                Family.all(ProjectileComponent.class, TransformComponent.class).get()
-        );
+        projectiles = engine.getEntitiesFor(Family.all(ProjectileComponent.class, TransformComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
         float delta = Math.min(deltaTime, 0.05f);
         expired.clear();
-
         for (int i = 0; i < projectiles.size(); i++) {
             Entity entity = projectiles.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
             TransformComponent transform = entity.getComponent(TransformComponent.class);
-
             projectile.remainingLife -= delta;
             if (projectile.remainingLife <= 0f
-                    || transform.y > arena.getHeight() + 40f
-                    || transform.x < -40f
-                    || transform.x > arena.getWidth() + 40f
-                    || transform.y < -40f) {
+                    || transform.y > arena.getHeight() + 60f
+                    || transform.x < -60f
+                    || transform.x > arena.getWidth() + 60f
+                    || transform.y < -60f) {
                 expired.add(entity);
             }
         }
-
-        for (int i = 0; i < expired.size; i++) {
-            engine.removeEntity(expired.get(i));
-        }
+        for (int i = 0; i < expired.size; i++) engine.removeEntity(expired.get(i));
     }
 }
