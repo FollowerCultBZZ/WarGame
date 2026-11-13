@@ -13,31 +13,8 @@ public class ParticleEffectFactory {
         this.engine = engine;
     }
 
-    public void createExplosion(float x, float y, float radius) {
-        EffectComponent effect = createEffect(x, y);
-        setWarmToAshGradient(effect, 1f, 0.94f, 0.12f);
-
-        int count = MathUtils.clamp((int) (radius * 0.45f), 14, 30);
-        float speedScale = MathUtils.clamp(radius / 34f, 0.7f, 2.2f);
-
-        for (int i = 0; i < count; i++) {
-            float angle = MathUtils.random(360f);
-            float speed = MathUtils.random(85f, 245f) * speedScale;
-            EffectComponent.Particle particle = createParticle(
-                    x, y, angle, speed,
-                    MathUtils.random(2.5f, 6.5f) * MathUtils.clamp(speedScale, 0.8f, 1.35f),
-                    MathUtils.random(0.58f, 0.95f)
-            );
-            particle.endSizeScale = 0.12f;
-            particle.drag = 1.8f;
-            effect.particles.add(particle);
-        }
-
-        add(effect);
-    }
-
     public void createShotSparks(float x, float y, float velocityX, float velocityY) {
-        EffectComponent effect = createEffect(x, y);
+        EffectComponent effect = createEffect();
         setWarmToAshGradient(effect, 1f, 0.98f, 0.68f);
 
         float baseAngle = MathUtils.atan2Deg(velocityY, velocityX) + 180f;
@@ -113,7 +90,7 @@ public class ParticleEffectFactory {
         add(effect);
     }
 
-    private EffectComponent createEffect(float x, float y) {
+    private EffectComponent createEffect() {
         return new EffectComponent();
     }
 
