@@ -23,6 +23,7 @@ android {
 
 configurations {
     natives
+    atlasTools
 }
 
 dependencies {
@@ -31,6 +32,8 @@ dependencies {
 
     natives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-armeabi-v7a'
     natives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-arm64-v8a'
+
+    atlasTools 'com.badlogicgames.gdx:gdx-tools:1.13.1'
 }
 
 // ========================================
@@ -61,4 +64,53 @@ tasks.register('copyAndroidNatives') {
 
 tasks.named('preBuild').configure {
     dependsOn 'copyAndroidNatives'
+}
+
+
+// ========================================
+// TEXTURE ATLAS
+// ========================================
+
+android {
+    sourceSets {
+        main {
+            assets.srcDirs += "$buildDir/generated/assets"
+        }
+    }
+}
+
+tasks.register('buildAtlases', JavaExec) {
+    group = 'assets'
+    description = 'Build LibGDX texture atlases'
+
+    classpath = configurations.atlasTools
+    mainClass.set('com.badlogic.gdx.tools.texturepacker.TexturePacker')
+
+    def inputDir = file('assets/sprites')
+    def outputDir = file("$buildDir/generated/assets/atlases")
+
+    inputs.dir(inputDir)
+    outputs.dir(outputDir)
+
+    doFirst {
+        if (!inputDir.exists()) {
+            throw new GradleException("Atlas source directory not found: ${inputDir}")
+        }
+
+        outputDir.mkdirs()
+
+        args = [
+            '--filter', 'Nearest,Nearest',
+            '--paddingX', '2',
+            '--paddingY', '2',
+            '--duplicatePadding',
+            inputDir.absolutePath,
+            outputDir.absolutePath,
+            'game'
+        ]
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn 'buildAtlases'
 }
