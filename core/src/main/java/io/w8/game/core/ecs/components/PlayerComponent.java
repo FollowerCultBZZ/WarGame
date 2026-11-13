@@ -16,4 +16,6 @@ public class PlayerComponent implements Component {
     public float rocketTimer = 1.2f;
     public float ultimateCooldown;
     public int score;
+    public int nextBossScore = 10000;
+    public boolean dead;
 }
