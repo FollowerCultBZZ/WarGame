@@ -43,7 +43,7 @@ public class PickupSystem extends EntitySystem {
                 int type = pickupEntity.getComponent(PickupComponent.class).type;
                 if (type == PickupComponent.SPEED) {
                     player.speedMultiplier = Math.min(1.8f, player.speedMultiplier + 0.12f);
-                    velocity.maxSpeed += 45f;
+                    velocity.maxSpeed = Math.min(velocity.maxSpeed, 620f);
                 } else if (type == PickupComponent.MULTI_SHOT) {
                     player.extraProjectiles = Math.min(4, player.extraProjectiles + 1);
                 } else if (type == PickupComponent.FIRE_RATE) {
