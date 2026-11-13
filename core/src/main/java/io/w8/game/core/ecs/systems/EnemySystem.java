@@ -18,7 +18,7 @@ public class EnemySystem extends EntitySystem {
     private EntityFactory factory;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> enemies;
-    private float spawnTimer = 0.45f;
+    private float spawnTimer = 2.2f;
     private float elapsed;
 
     public EnemySystem(Arena arena) {
@@ -44,8 +44,8 @@ public class EnemySystem extends EntitySystem {
             int kind = roll < 30 ? 0 : roll < 62 ? 1 : 2;
             float x = MathUtils.random(38f, Math.max(39f, arena.getWidth() - 38f));
             factory.createEnemy(x, arena.getHeight() - 38f, kind, difficulty);
-            float baseInterval = 0.92f - difficulty * 0.032f;
-            spawnTimer = Math.max(0.14f, baseInterval);
+            float baseInterval = 1.85f - difficulty * 0.065f;
+            spawnTimer = Math.max(0.24f, baseInterval);
         }
 
         if (players.size() == 0) return;
