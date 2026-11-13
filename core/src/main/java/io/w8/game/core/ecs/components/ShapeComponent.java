@@ -13,4 +13,6 @@ public class ShapeComponent implements Component {
     public float red = 0.2f;
     public float green = 0.85f;
     public float blue = 1f;
+    public boolean hollow;
+    public float rotationSpeed;
 }

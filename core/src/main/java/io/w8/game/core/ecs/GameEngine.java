@@ -3,6 +3,7 @@ package io.w8.game.core.ecs;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import io.w8.game.core.ecs.systems.CombatSystem;
+import io.w8.game.core.ecs.systems.EffectSystem;
 import io.w8.game.core.ecs.systems.EnemySystem;
 import io.w8.game.core.ecs.systems.HomingSystem;
 import io.w8.game.core.ecs.systems.MovementSystem;
@@ -30,6 +31,7 @@ public class GameEngine {
         engine.addSystem(new CombatSystem());
         engine.addSystem(new PickupSystem());
         engine.addSystem(new ProjectileSystem(arena));
+        engine.addSystem(new EffectSystem());
         engine.addSystem(renderSystem);
     }
 

@@ -10,15 +10,18 @@ import io.w8.game.core.ecs.components.PlayerComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.ecs.components.VelocityComponent;
 import io.w8.game.core.ecs.components.WeaponComponent;
+import io.w8.game.core.ecs.factories.EntityFactory;
 
 public class PickupSystem extends EntitySystem {
     private Engine engine;
+    private EntityFactory factory;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> pickups;
 
     @Override
     public void addedToEngine(Engine engine) {
         this.engine = engine;
+        factory = new EntityFactory(engine);
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class, WeaponComponent.class).get());
         pickups = engine.getEntitiesFor(Family.all(PickupComponent.class, TransformComponent.class).get());
     }
@@ -30,7 +33,6 @@ public class PickupSystem extends EntitySystem {
             PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
             TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
             VelocityComponent velocity = playerEntity.getComponent(VelocityComponent.class);
-            WeaponComponent weapon = playerEntity.getComponent(WeaponComponent.class);
 
             for (int j = 0; j < pickups.size(); j++) {
                 Entity pickupEntity = pickups.get(j);
@@ -38,16 +40,16 @@ public class PickupSystem extends EntitySystem {
                 TransformComponent pickupTransform = pickupEntity.getComponent(TransformComponent.class);
                 float dx = playerTransform.x - pickupTransform.x;
                 float dy = playerTransform.y - pickupTransform.y;
-                if (dx * dx + dy * dy > 34f * 34f) continue;
+                if (dx * dx + dy * dy > 39f * 39f) continue;
 
                 int type = pickupEntity.getComponent(PickupComponent.class).type;
                 if (type == PickupComponent.SPEED) {
-                    player.speedMultiplier = Math.min(1.8f, player.speedMultiplier + 0.12f);
-                    velocity.maxSpeed = Math.min(velocity.maxSpeed, 620f);
+                    player.speedMultiplier = Math.min(2.15f, player.speedMultiplier + 0.15f);
+                    velocity.maxSpeed = Math.min(1050f, velocity.maxSpeed + 35f);
                 } else if (type == PickupComponent.MULTI_SHOT) {
-                    player.extraProjectiles = Math.min(4, player.extraProjectiles + 1);
+                    player.extraProjectiles = Math.min(5, player.extraProjectiles + 1);
                 } else if (type == PickupComponent.FIRE_RATE) {
-                    player.fireRateMultiplier = Math.min(2.2f, player.fireRateMultiplier + 0.15f);
+                    player.fireRateMultiplier = Math.min(2.5f, player.fireRateMultiplier + 0.15f);
                 } else if (type == PickupComponent.HEAL) {
                     player.health = Math.min(player.maxHealth, player.health + 28f);
                 } else if (type == PickupComponent.HOMING) {
@@ -55,6 +57,7 @@ public class PickupSystem extends EntitySystem {
                 } else if (type == PickupComponent.PIERCING) {
                     player.piercingLevels = Math.min(3, player.piercingLevels + 1);
                 }
+                factory.createEffect(pickupTransform.x, pickupTransform.y, 0.3f, 1f, 0.8f, 24f);
                 engine.removeEntity(pickupEntity);
             }
         }

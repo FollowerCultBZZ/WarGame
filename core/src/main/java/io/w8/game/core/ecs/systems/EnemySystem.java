@@ -15,7 +15,6 @@ import io.w8.game.core.world.Arena;
 
 public class EnemySystem extends EntitySystem {
     private final Arena arena;
-    private Engine engine;
     private EntityFactory factory;
     private ImmutableArray<Entity> players;
     private ImmutableArray<Entity> enemies;
@@ -28,7 +27,6 @@ public class EnemySystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
-        this.engine = engine;
         factory = new EntityFactory(engine);
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class, TransformComponent.class).get());
         enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class, VelocityComponent.class).get());
@@ -38,13 +36,14 @@ public class EnemySystem extends EntitySystem {
     public void update(float deltaTime) {
         float delta = Math.min(deltaTime, 0.05f);
         elapsed += delta;
+        float difficulty = Math.min(20f, elapsed / 24f);
         spawnTimer -= delta;
 
         if (spawnTimer <= 0f && players.size() > 0) {
             int kind = MathUtils.random(0, 9) < 6 ? 0 : (MathUtils.randomBoolean() ? 1 : 2);
             float x = MathUtils.random(45f, Math.max(46f, arena.getWidth() - 45f));
-            factory.createEnemy(x, arena.getHeight() - 45f, kind, Math.min(12f, elapsed / 35f));
-            spawnTimer = Math.max(0.38f, 1.45f - elapsed * 0.008f);
+            factory.createEnemy(x, arena.getHeight() - 45f, kind, difficulty);
+            spawnTimer = Math.max(0.32f, 1.5f - elapsed * 0.009f);
         }
 
         if (players.size() == 0) return;
@@ -60,8 +59,17 @@ public class EnemySystem extends EntitySystem {
             float dy = target.y - transform.y;
             float length = (float) Math.sqrt(dx * dx + dy * dy);
             if (length > 0.001f) {
-                velocity.x = dx / length * enemy.speed;
-                velocity.y = dy / length * enemy.speed;
+                float chaseFactor = enemy.kind == 1 ? 0.78f : 1f;
+                velocity.x = dx / length * enemy.speed * chaseFactor;
+                velocity.y = dy / length * enemy.speed * chaseFactor;
+            }
+
+            enemy.fireTimer -= delta;
+            if (enemy.fireTimer <= 0f) {
+                float fireSpeed = 250f + difficulty * 8f;
+                factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
+                        target.x, target.y, fireSpeed, 9f + difficulty * 0.55f);
+                enemy.fireTimer = Math.max(0.85f, enemy.fireInterval - difficulty * 0.055f);
             }
         }
     }

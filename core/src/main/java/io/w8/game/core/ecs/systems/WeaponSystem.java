@@ -33,20 +33,25 @@ public class WeaponSystem extends EntitySystem {
             TransformComponent transform = player.getComponent(TransformComponent.class);
             PlayerComponent stats = player.getComponent(PlayerComponent.class);
             WeaponComponent weapon = player.getComponent(WeaponComponent.class);
-            weapon.fireTimer -= delta;
-            if (weapon.fireTimer > 0f) continue;
 
-            weapon.fireTimer = weapon.fireInterval / stats.fireRateMultiplier;
-            int count = 1 + stats.extraProjectiles;
-            float spacing = 13f;
-            for (int shot = 0; shot < count; shot++) {
-                float offset = (shot - (count - 1) * 0.5f) * spacing;
-                factory.createProjectile(
-                        transform.x, transform.y + 28f, offset,
-                        weapon.projectileSpeed,
-                        stats.homingLevels > 0,
-                        stats.piercingLevels
-                );
+            weapon.fireTimer -= delta;
+            if (weapon.fireTimer <= 0f) {
+                weapon.fireTimer = weapon.fireInterval / stats.fireRateMultiplier;
+                int count = 1 + stats.extraProjectiles;
+                for (int shot = 0; shot < count; shot++) {
+                    float offset = (shot - (count - 1) * 0.5f) * 13f;
+                    factory.createProjectile(transform.x, transform.y + 32f, offset,
+                            weapon.projectileSpeed, false, stats.piercingLevels);
+                }
+            }
+
+            if (stats.homingLevels > 0) {
+                stats.rocketTimer -= delta;
+                if (stats.rocketTimer <= 0f) {
+                    factory.createRocket(transform.x - 12f, transform.y + 4f);
+                    if (stats.homingLevels >= 2) factory.createRocket(transform.x + 12f, transform.y + 4f);
+                    stats.rocketTimer = Math.max(0.55f, 2.8f - stats.homingLevels * 0.45f);
+                }
             }
         }
     }

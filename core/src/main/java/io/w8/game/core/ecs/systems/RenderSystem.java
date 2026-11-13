@@ -6,7 +6,9 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import io.w8.game.core.ecs.components.EffectComponent;
 import io.w8.game.core.ecs.components.PlayerComponent;
+import io.w8.game.core.ecs.components.PickupComponent;
 import io.w8.game.core.ecs.components.ShapeComponent;
 import io.w8.game.core.ecs.components.TransformComponent;
 import io.w8.game.core.world.Arena;
@@ -17,6 +19,7 @@ public class RenderSystem extends EntitySystem {
     private final Arena arena;
     private ImmutableArray<Entity> entities;
     private ImmutableArray<Entity> players;
+    private ImmutableArray<Entity> effects;
 
     public RenderSystem(OrthographicCamera camera, Arena arena) {
         this.camera = camera;
@@ -27,6 +30,7 @@ public class RenderSystem extends EntitySystem {
     public void addedToEngine(com.badlogic.ashley.core.Engine engine) {
         entities = engine.getEntitiesFor(Family.all(TransformComponent.class, ShapeComponent.class).get());
         players = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
+        effects = engine.getEntitiesFor(Family.all(EffectComponent.class, TransformComponent.class).get());
     }
 
     public void render() {
@@ -34,28 +38,62 @@ public class RenderSystem extends EntitySystem {
         renderer.begin(ShapeRenderer.ShapeType.Line);
         renderer.setColor(0.2f, 0.45f, 0.65f, 1f);
         renderer.rect(0f, 0f, arena.getWidth(), arena.getHeight());
+        for (int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
+            if (entity.getComponent(PickupComponent.class) == null) continue;
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            ShapeComponent shape = entity.getComponent(ShapeComponent.class);
+            renderer.setColor(shape.red, shape.green, shape.blue, 1f);
+            float r = shape.radius;
+            if (shape.type == ShapeComponent.CIRCLE) {
+                renderer.circle(transform.x, transform.y, r, 24);
+                renderer.circle(transform.x, transform.y, r * 0.55f, 16);
+            } else {
+                renderer.rect(transform.x - r, transform.y - r, r, r,
+                        r, r, 1f, 1f, transform.rotation);
+            }
+        }
+
+        for (int i = 0; i < effects.size(); i++) {
+            Entity entity = effects.get(i);
+            EffectComponent effect = entity.getComponent(EffectComponent.class);
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            float progress = Math.min(1f, effect.age / effect.duration);
+            float radius = effect.radius * (0.35f + progress);
+            renderer.setColor(effect.red, effect.green, effect.blue, 1f - progress);
+            renderer.circle(transform.x, transform.y, radius, 24);
+        }
         renderer.end();
 
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
+            if (entity.getComponent(PickupComponent.class) != null) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             ShapeComponent shape = entity.getComponent(ShapeComponent.class);
             renderer.setColor(shape.red, shape.green, shape.blue, 1f);
 
             if (shape.type == ShapeComponent.TRIANGLE) {
                 float r = shape.radius;
-                renderer.triangle(transform.x, transform.y + r * 1.35f,
-                        transform.x - r, transform.y - r,
-                        transform.x + r, transform.y - r);
+                if (entity.getComponent(PlayerComponent.class) != null) {
+                    renderer.triangle(transform.x, transform.y + r * 1.35f,
+                            transform.x - r, transform.y - r,
+                            transform.x + r, transform.y - r);
+                    renderer.setColor(0.65f, 0.95f, 1f, 1f);
+                    renderer.triangle(transform.x, transform.y + r * 0.75f,
+                            transform.x - r * 0.38f, transform.y - r * 0.55f,
+                            transform.x + r * 0.38f, transform.y - r * 0.55f);
+                } else {
+                    renderer.triangle(transform.x, transform.y + r * 1.35f,
+                            transform.x - r, transform.y - r,
+                            transform.x + r, transform.y - r);
+                }
             } else if (shape.type == ShapeComponent.CIRCLE) {
                 renderer.circle(transform.x, transform.y, shape.radius, 20);
-            } else if (shape.type == ShapeComponent.RECTANGLE) {
+            } else {
                 renderer.rect(transform.x - shape.radius * 0.35f,
-                        transform.y - shape.radius, shape.radius * 0.7f, shape.radius * 2f);
-            } else if (shape.type == ShapeComponent.SQUARE) {
-                renderer.rect(transform.x - shape.radius, transform.y - shape.radius,
-                        shape.radius * 2f, shape.radius * 2f);
+                        transform.y - shape.radius, shape.radius * 0.7f, shape.radius * 2f,
+                        shape.radius * 0.35f, shape.radius, 1f, 1f, transform.rotation);
             }
         }
 
@@ -68,12 +106,10 @@ public class RenderSystem extends EntitySystem {
             float height = 13f;
             renderer.setColor(0.08f, 0.1f, 0.16f, 0.95f);
             renderer.rect(x, y, width, height);
-            renderer.setColor(ratio > 0.55f ? 0.18f : ratio > 0.25f ? 1f : 1f,
+            renderer.setColor(ratio > 0.55f ? 0.18f : 1f,
                     ratio > 0.55f ? 0.85f : ratio > 0.25f ? 0.68f : 0.2f,
                     ratio > 0.55f ? 0.35f : 0.12f, 1f);
             renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, height - 4f);
-            renderer.setColor(0.7f, 0.85f, 1f, 1f);
-            renderer.rect(x, y - 4f, width, 1f);
         }
         renderer.end();
     }

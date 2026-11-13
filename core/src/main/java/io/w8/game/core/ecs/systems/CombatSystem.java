@@ -40,6 +40,26 @@ public class CombatSystem extends EntitySystem {
             TransformComponent shotTransform = shot.getComponent(TransformComponent.class);
             ProjectileComponent projectile = shot.getComponent(ProjectileComponent.class);
 
+            if (projectile.enemyOwned) {
+                for (int p = 0; p < players.size(); p++) {
+                    Entity playerEntity = players.get(p);
+                    TransformComponent playerTransform = playerEntity.getComponent(TransformComponent.class);
+                    float dx = shotTransform.x - playerTransform.x;
+                    float dy = shotTransform.y - playerTransform.y;
+                    if (dx * dx + dy * dy <= 28f * 28f) {
+                        PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
+                        if (player.damageCooldown <= 0f) {
+                            player.health = Math.max(0f, player.health - projectile.damage);
+                            player.damageCooldown = 0.35f;
+                            factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.2f, 0.12f, 26f);
+                        }
+                        remove.add(shot);
+                        break;
+                    }
+                }
+                continue;
+            }
+
             for (int j = 0; j < enemies.size(); j++) {
                 Entity enemyEntity = enemies.get(j);
                 if (remove.contains(enemyEntity, true)) continue;
@@ -47,22 +67,20 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = shotTransform.x - enemyTransform.x;
                 float dy = shotTransform.y - enemyTransform.y;
-                float radius = enemy.radius + 8f;
+                float radius = enemy.radius + (projectile.rocket ? 13f : 8f);
 
                 if (dx * dx + dy * dy <= radius * radius) {
                     enemy.health -= projectile.damage;
+                    factory.createEffect(shotTransform.x, shotTransform.y, 1f, 0.55f, 0.2f, projectile.rocket ? 25f : 12f);
                     if (enemy.health <= 0f) {
                         remove.add(enemyEntity);
+                        factory.createEffect(enemyTransform.x, enemyTransform.y, 1f, 0.25f, 0.18f, enemy.radius * 1.8f);
                         if (MathUtils.randomBoolean(0.42f)) {
-                            int type = MathUtils.random(0, 5);
-                            factory.createPickup(enemyTransform.x, enemyTransform.y, type);
+                            factory.createPickup(enemyTransform.x, enemyTransform.y, MathUtils.random(0, 5));
                         }
                     }
-                    if (projectile.pierceRemaining > 0) {
-                        projectile.pierceRemaining--;
-                    } else {
-                        remove.add(shot);
-                    }
+                    if (projectile.pierceRemaining > 0) projectile.pierceRemaining--;
+                    else remove.add(shot);
                     break;
                 }
             }
@@ -81,12 +99,12 @@ public class CombatSystem extends EntitySystem {
                 EnemyComponent enemy = enemyEntity.getComponent(EnemyComponent.class);
                 float dx = playerTransform.x - enemyTransform.x;
                 float dy = playerTransform.y - enemyTransform.y;
-                float radius = enemy.radius + 18f;
-
+                float radius = enemy.radius + 22f;
                 if (dx * dx + dy * dy <= radius * radius && player.damageCooldown <= 0f) {
                     player.health = Math.max(0f, player.health - enemy.contactDamage);
                     player.damageCooldown = 0.65f;
                     enemy.health -= 1f;
+                    factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.15f, 0.12f, 30f);
                     if (enemy.health <= 0f) remove.add(enemyEntity);
                     break;
                 }

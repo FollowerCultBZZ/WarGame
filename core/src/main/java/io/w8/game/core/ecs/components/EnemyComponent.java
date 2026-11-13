@@ -7,5 +7,7 @@ public class EnemyComponent implements Component {
     public float speed = 90f;
     public float contactDamage = 12f;
     public float radius = 16f;
+    public float fireTimer;
+    public float fireInterval = 2.8f;
     public int kind;
 }
