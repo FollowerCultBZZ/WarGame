@@ -1,0 +1,9 @@
+{
+  "filterMin": "Nearest",
+  "filterMag": "Nearest",
+  "paddingX": 2,
+  "paddingY": 2,
+  "duplicatePadding": true,
+  "useIndexes": true,
+  "rotation": false
+}
