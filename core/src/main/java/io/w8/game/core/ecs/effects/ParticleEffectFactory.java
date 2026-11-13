@@ -70,7 +70,7 @@ public class ParticleEffectFactory {
 
     public void createExplosion(float x, float y, float radius,
                                 float red, float green, float blue) {
-        EffectComponent effect = createEffect(x, y);
+        EffectComponent effect = createEffect();
         setWarmToAshGradient(effect, red, green, blue);
         int count = MathUtils.clamp((int) (radius * 0.45f), 14, 30);
         float speedScale = MathUtils.clamp(radius / 34f, 0.7f, 2.2f);
