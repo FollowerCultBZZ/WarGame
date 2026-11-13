@@ -77,6 +77,15 @@ public class RenderSystem extends EntitySystem {
             renderer.setColor(effect.red, effect.green, effect.blue, 1f - progress);
             renderer.circle(transform.x, transform.y, radius, 24);
         }
+        for (int i = 0; i < players.size(); i++) {
+            Entity playerEntity = players.get(i);
+            PlayerComponent player = playerEntity.getComponent(PlayerComponent.class);
+            if (player.invulnerabilityTimer > 0f) {
+                TransformComponent transform = playerEntity.getComponent(TransformComponent.class);
+                renderer.setColor(0.25f, 0.9f, 1f, 1f);
+                renderer.circle(transform.x, transform.y, 39f, 32);
+            }
+        }
         renderer.end();
 
         renderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -168,12 +177,26 @@ public class RenderSystem extends EntitySystem {
             PlayerComponent player = players.first().getComponent(PlayerComponent.class);
             font.getData().setScale(1.35f);
             font.draw(batch, "SCORE " + player.score, arena.getWidth() - 175f, arena.getHeight() - 22f);
+            font.getData().setScale(1.15f);
+            font.draw(batch, "LIVES " + player.lives, 20f, arena.getHeight() - 58f);
+            if (player.invulnerabilityTimer > 0f) {
+                font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
+                        20f, arena.getHeight() - 82f);
+            }
             if (player.dead) {
                 font.getData().setScale(3.2f);
                 font.draw(batch, "GAME OVER", arena.getWidth() * 0.5f - 100f, arena.getHeight() * 0.5f + 18f);
                 font.getData().setScale(1.5f);
                 font.draw(batch, "FINAL SCORE " + player.score, arena.getWidth() * 0.5f - 95f,
                         arena.getHeight() * 0.5f - 25f);
+            }
+        }
+        for (int i = 0; i < enemies.size(); i++) {
+            EnemyComponent enemy = enemies.get(i).getComponent(EnemyComponent.class);
+            if (enemy.kind == 3) {
+                font.getData().setScale(1.1f);
+                font.draw(batch, "BOSS  STAGE " + enemy.bossStage,
+                        arena.getWidth() * 0.18f, arena.getHeight() - 47f);
             }
         }
         batch.end();
