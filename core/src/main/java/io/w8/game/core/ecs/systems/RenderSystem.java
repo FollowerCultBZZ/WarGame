@@ -109,9 +109,10 @@ public class RenderSystem extends EntitySystem {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
+            ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
             if (entity.getComponent(PickupComponent.class) != null
                     || entity.getComponent(PlayerComponent.class) != null
-                    || entity.getComponent(ProjectileComponent.class) != null) continue;
+                    || (projectile != null && !projectile.enemyOwned)) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             ShapeComponent shape = entity.getComponent(ShapeComponent.class);
             renderer.setColor(shape.red, shape.green, shape.blue, 1f);
@@ -207,7 +208,7 @@ public class RenderSystem extends EntitySystem {
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
-            if (projectile == null) continue;
+            if (projectile == null || projectile.enemyOwned) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             TextureRegion region = projectile.rocket ? missileRegion : bulletRegion;
             float height = projectile.rocket ? 32f : 19f;
