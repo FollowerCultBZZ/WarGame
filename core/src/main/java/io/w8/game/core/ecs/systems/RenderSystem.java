@@ -160,6 +160,8 @@ public class RenderSystem extends EntitySystem {
         renderer.end();
 
         particleRenderer.render(effects);
+
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
