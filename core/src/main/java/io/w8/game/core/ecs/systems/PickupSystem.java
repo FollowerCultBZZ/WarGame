@@ -83,7 +83,7 @@ public class PickupSystem extends EntitySystem {
                         if (player.rocketCount < 4) {
                             player.rocketCount++;
                         } else {
-                            player.rocketFireRateMultiplier = Math.min(2.25f,
+                            player.rocketFireRateMultiplier = Math.min(6f,
                                     player.rocketFireRateMultiplier + 0.25f);
                             player.rocketTimer = Math.min(player.rocketTimer,
                                     Math.max(0.32f, 2.8f / player.rocketFireRateMultiplier));
