@@ -5,6 +5,9 @@ import com.badlogic.ashley.core.Component;
 public class PlayerComponent implements Component {
     public float health = 100f;
     public float maxHealth = 100f;
+    public float shieldHealth;
+    public float maxShieldHealth = 50f;
+    public float shieldTimer;
     public float damageCooldown;
     public float invulnerabilityTimer;
     public int lives = 3;
