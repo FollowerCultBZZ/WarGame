@@ -5,6 +5,8 @@ import com.badlogic.ashley.core.Component;
 public class EnemyComponent implements Component {
     public float health = 2f;
     public float maxHealth = 2f;
+    public float shieldHealth;
+    public float maxShieldHealth;
     public float speed = 90f;
     public float contactDamage = 12f;
     public float radius = 16f;
