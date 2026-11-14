@@ -124,7 +124,7 @@ public class EnemySystem extends EntitySystem {
                     } else {
                         enemy.bossAttackTimer -= delta;
                         if (enemy.bossAttackTimer <= 0f) {
-                            enemy.bossPatternActiveTimer = 2.1f;
+                            enemy.bossPatternActiveTimer = enemy.bossNumber >= 2 ? 3.2f : 2.1f;
                             enemy.bossShotTimer = 0f;
                         }
                     }
@@ -194,7 +194,7 @@ public class EnemySystem extends EntitySystem {
                     float fireSpeed = 360f + difficulty * 18f;
                     factory.createEnemyProjectile(transform.x, transform.y - enemy.radius,
                             target.x, target.y, fireSpeed, 16f + difficulty * 1.1f);
-                    enemy.fireTimer = Math.max(0.48f, enemy.fireInterval - difficulty * 0.045f);
+                    enemy.fireTimer = Math.max(0.72f, enemy.fireInterval + 0.28f);
                 }
             } else if (length > 0.001f) {
                 float nx = dx / length;
