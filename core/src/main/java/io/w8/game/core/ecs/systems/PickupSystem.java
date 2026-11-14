@@ -76,6 +76,8 @@ public class PickupSystem extends EntitySystem {
                         break;
                     case PickupComponent.HEAL:
                         player.health = Math.min(player.maxHealth, player.health + 28f);
+                        player.shieldHealth = player.maxShieldHealth;
+                        player.shieldTimer = 3f;
                         break;
                     case PickupComponent.HOMING:
                         if (player.rocketCount < 4) {
