@@ -36,6 +36,7 @@ public class RenderSystem extends EntitySystem {
     private final BitmapFont font;
     private final TextureAtlas atlas;
     private final TextureRegion playerRegion;
+    private final TextureRegion armoryShipRegion;
     private final TextureRegion bulletRegion;
     private final TextureRegion missileRegion;
     private final TextureRegion healthIcon;
@@ -61,6 +62,7 @@ public class RenderSystem extends EntitySystem {
         this.arena = arena;
         atlas = new TextureAtlas(Gdx.files.internal("atlases/game.atlas"));
         playerRegion = atlas.findRegion("player");
+        armoryShipRegion = atlas.findRegion("armory-ship");
         bulletRegion = atlas.findRegion("bullet");
         missileRegion = atlas.findRegion("missile");
         healthIcon = atlas.findRegion("health-icon");
@@ -168,7 +170,9 @@ public class RenderSystem extends EntitySystem {
             ProjectileComponent projectile = entity.getComponent(ProjectileComponent.class);
             if (entity.getComponent(PickupComponent.class) != null
                     || entity.getComponent(PlayerComponent.class) != null
-                    || (projectile != null && !projectile.enemyOwned)) continue;
+                    || (projectile != null && !projectile.enemyOwned)
+                    || (entity.getComponent(EnemyComponent.class) != null
+                    && entity.getComponent(EnemyComponent.class).kind == 1)) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
             ShapeComponent shape = entity.getComponent(ShapeComponent.class);
             renderer.setColor(shape.red, shape.green, shape.blue, 1f);
@@ -210,6 +214,22 @@ public class RenderSystem extends EntitySystem {
                 renderer.setColor(0.15f, 0.72f, 1f, 1f);
                 renderer.rect(x + 2f, shieldY + 2f, (width - 4f) * shieldRatio, height - 4f);
             }
+        }
+
+        for (int i = 0; i < enemies.size(); i++) {
+            Entity entity = enemies.get(i);
+            EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
+            if (enemy.kind != 1 || enemy.shieldHealth <= 0f) continue;
+            TransformComponent transform = entity.getComponent(TransformComponent.class);
+            float ratio = enemy.maxShieldHealth <= 0f ? 0f
+                    : Math.max(0f, Math.min(1f, enemy.shieldHealth / enemy.maxShieldHealth));
+            float width = 64f;
+            float x = transform.x - width * 0.5f;
+            float y = transform.y + 54f;
+            renderer.setColor(0.04f, 0.1f, 0.18f, 0.95f);
+            renderer.rect(x, y, width, 7f);
+            renderer.setColor(0.15f, 0.72f, 1f, 1f);
+            renderer.rect(x + 1f, y + 1f, (width - 2f) * ratio, 5f);
         }
 
         for (int i = 0; i < enemies.size(); i++) {
@@ -258,6 +278,30 @@ public class RenderSystem extends EntitySystem {
                 }
                 drawCentered(shieldRegion, transform.x, transform.y, 88f, 88f, rotation);
                 if (shieldShader != null) batch.setShader(null);
+            }
+        }
+
+        if (armoryShipRegion != null) {
+            for (int i = 0; i < enemies.size(); i++) {
+                Entity entity = enemies.get(i);
+                EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
+                if (enemy.kind != 1) continue;
+                TransformComponent transform = entity.getComponent(TransformComponent.class);
+                float shipHeight = 88f;
+                float shipWidth = shipHeight * armoryShipRegion.getRegionWidth()
+                        / (float) armoryShipRegion.getRegionHeight();
+                drawCentered(armoryShipRegion, transform.x, transform.y,
+                        shipWidth, shipHeight, transform.rotation);
+                if (enemy.shieldHealth > 0f && shieldRegion != null) {
+                    if (shieldShader != null) {
+                        batch.setShader(shieldShader);
+                        shieldShader.bind();
+                        shieldShader.setUniformf("u_time", animationTime);
+                    }
+                    drawCentered(shieldRegion, transform.x, transform.y, 116f, 116f,
+                            transform.rotation);
+                    if (shieldShader != null) batch.setShader(null);
+                }
             }
         }
 
