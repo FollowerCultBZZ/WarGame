@@ -219,17 +219,29 @@ public class RenderSystem extends EntitySystem {
         for (int i = 0; i < enemies.size(); i++) {
             Entity entity = enemies.get(i);
             EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
-            if (enemy.kind != 1 || enemy.shieldHealth <= 0f) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
-            float ratio = enemy.maxShieldHealth <= 0f ? 0f
-                    : Math.max(0f, Math.min(1f, enemy.shieldHealth / enemy.maxShieldHealth));
-            float width = 64f;
+            float width = enemy.kind == 3 ? 86f : enemy.kind == 1 ? 68f : 48f;
+            float height = 6f;
             float x = transform.x - width * 0.5f;
-            float y = transform.y + 54f;
-            renderer.setColor(0.04f, 0.1f, 0.18f, 0.95f);
-            renderer.rect(x, y, width, 7f);
-            renderer.setColor(0.15f, 0.72f, 1f, 1f);
-            renderer.rect(x + 1f, y + 1f, (width - 2f) * ratio, 5f);
+            float y = transform.y + enemy.radius + 12f;
+            float healthRatio = enemy.maxHealth <= 0f ? 0f
+                    : Math.max(0f, Math.min(1f, enemy.health / enemy.maxHealth));
+            renderer.setColor(0.08f, 0.04f, 0.06f, 0.95f);
+            renderer.rect(x, y, width, height);
+            renderer.setColor(healthRatio > 0.55f ? 0.2f : 1f,
+                    healthRatio > 0.55f ? 0.82f : healthRatio > 0.25f ? 0.62f : 0.12f,
+                    0.16f, 1f);
+            renderer.rect(x + 1f, y + 1f, (width - 2f) * healthRatio, height - 2f);
+
+            if (enemy.maxShieldHealth > 0f && enemy.shieldHealth > 0f) {
+                float shieldRatio = Math.max(0f,
+                        Math.min(1f, enemy.shieldHealth / enemy.maxShieldHealth));
+                float shieldY = y + height + 3f;
+                renderer.setColor(0.04f, 0.1f, 0.18f, 0.95f);
+                renderer.rect(x, shieldY, width, 5f);
+                renderer.setColor(0.15f, 0.72f, 1f, 1f);
+                renderer.rect(x + 1f, shieldY + 1f, (width - 2f) * shieldRatio, 3f);
+            }
         }
 
         for (int i = 0; i < enemies.size(); i++) {
@@ -290,8 +302,12 @@ public class RenderSystem extends EntitySystem {
                 float shipHeight = 88f;
                 float shipWidth = shipHeight * armoryShipRegion.getRegionWidth()
                         / (float) armoryShipRegion.getRegionHeight();
+                float shipRotation = transform.rotation + 180f;
+                TextureRegion flame = fireAnimation.getKeyFrame(animationTime);
+                drawCentered(flame, transform.x, transform.y + 52f,
+                        22f, 30f, shipRotation);
                 drawCentered(armoryShipRegion, transform.x, transform.y,
-                        shipWidth, shipHeight, transform.rotation);
+                        shipWidth, shipHeight, shipRotation);
                 if (enemy.shieldHealth > 0f && shieldRegion != null) {
                     if (shieldShader != null) {
                         batch.setShader(shieldShader);
@@ -299,7 +315,7 @@ public class RenderSystem extends EntitySystem {
                         shieldShader.setUniformf("u_time", animationTime);
                     }
                     drawCentered(shieldRegion, transform.x, transform.y, 116f, 116f,
-                            transform.rotation);
+                            shipRotation);
                     if (shieldShader != null) batch.setShader(null);
                 }
             }
