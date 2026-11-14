@@ -47,6 +47,12 @@ public class CombatSystem extends EntitySystem {
             PlayerComponent player = players.get(i).getComponent(PlayerComponent.class);
             player.damageCooldown = Math.max(0f, player.damageCooldown - deltaTime);
             player.invulnerabilityTimer = Math.max(0f, player.invulnerabilityTimer - deltaTime);
+            if (player.shieldTimer > 0f) {
+                player.shieldTimer = Math.max(0f, player.shieldTimer - deltaTime);
+                if (player.shieldTimer == 0f) player.shieldHealth = 0f;
+            } else {
+                player.shieldHealth = 0f;
+            }
         }
 
         for (int i = 0; i < projectiles.size(); i++) {
@@ -172,7 +178,17 @@ public class CombatSystem extends EntitySystem {
 
         TransformComponent transform = entity.getComponent(TransformComponent.class);
         VelocityComponent velocity = entity.getComponent(VelocityComponent.class);
-        player.health = Math.max(0f, player.health - damage);
+        float remainingDamage = damage;
+        if (player.shieldTimer > 0f && player.shieldHealth > 0f) {
+            float absorbedDamage = Math.min(player.shieldHealth, remainingDamage);
+            player.shieldHealth -= absorbedDamage;
+            remainingDamage -= absorbedDamage;
+            if (player.shieldHealth <= 0f) {
+                player.shieldHealth = 0f;
+                player.shieldTimer = 0f;
+            }
+        }
+        player.health = Math.max(0f, player.health - remainingDamage);
         player.damageCooldown = cooldown;
         factory.createEffect(transform.x, transform.y, 1f, 0.2f, 0.12f, 28f);
 
@@ -186,6 +202,8 @@ public class CombatSystem extends EntitySystem {
         }
 
         player.health = player.maxHealth;
+        player.shieldHealth = 0f;
+        player.shieldTimer = 0f;
         player.invulnerabilityTimer = 5f;
         player.damageCooldown = 0.6f;
         transform.x = arena.getWidth() * 0.5f;
