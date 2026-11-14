@@ -33,6 +33,8 @@ public class EnemyFactory {
             shape.blue = 1f;
         } else if (kind == 1) {
             enemy.health = 15f + difficulty * 2.2f;
+            enemy.maxShieldHealth = 25f + difficulty * 2.5f;
+            enemy.shieldHealth = enemy.maxShieldHealth;
             enemy.speed = 118f + difficulty * 4.8f;
             enemy.contactDamage = 42f + difficulty * 1.8f;
             enemy.radius = 31f;
