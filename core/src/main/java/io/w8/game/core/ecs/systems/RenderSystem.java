@@ -200,6 +200,16 @@ public class RenderSystem extends EntitySystem {
                     ratio > 0.55f ? 0.85f : ratio > 0.25f ? 0.68f : 0.12f,
                     ratio > 0.55f ? 0.35f : 0.12f, 1f);
             renderer.rect(x + 2f, y + 2f, (width - 4f) * ratio, height - 4f);
+
+            float shieldRatio = player.maxShieldHealth <= 0f ? 0f
+                    : Math.max(0f, Math.min(1f, player.shieldHealth / player.maxShieldHealth));
+            if (player.shieldTimer > 0f && player.shieldHealth > 0f) {
+                float shieldY = y - 19f;
+                renderer.setColor(0.05f, 0.12f, 0.2f, 0.95f);
+                renderer.rect(x, shieldY, width, height);
+                renderer.setColor(0.15f, 0.72f, 1f, 1f);
+                renderer.rect(x + 2f, shieldY + 2f, (width - 4f) * shieldRatio, height - 4f);
+            }
         }
 
         for (int i = 0; i < enemies.size(); i++) {
@@ -240,7 +250,7 @@ public class RenderSystem extends EntitySystem {
             drawCentered(playerRegion, transform.x, transform.y,
                     playerWidth, playerHeight, rotation);
 
-            if (player.invulnerabilityTimer > 0f && shieldRegion != null) {
+            if (player.shieldTimer > 0f && player.shieldHealth > 0f && shieldRegion != null) {
                 if (shieldShader != null) {
                     batch.setShader(shieldShader);
                     shieldShader.bind();
@@ -288,8 +298,14 @@ public class RenderSystem extends EntitySystem {
                     arena.getHeight() - 38f);
             font.draw(batch, "LIVES " + player.lives, 44f, arena.getHeight() - 82f);
             float statusY = arena.getHeight() - 116f;
+            if (player.shieldTimer > 0f && player.shieldHealth > 0f) {
+                font.draw(batch, "SHIELD " + (int) Math.ceil(player.shieldHealth)
+                        + "/" + (int) player.maxShieldHealth + "  "
+                        + (int) Math.ceil(player.shieldTimer) + "s", 44f, statusY);
+                statusY -= 30f;
+            }
             if (player.invulnerabilityTimer > 0f) {
-                font.draw(batch, "SHIELD " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
+                font.draw(batch, "INVULNERABLE " + (int) Math.ceil(player.invulnerabilityTimer) + "s",
                         44f, statusY);
                 statusY -= 30f;
             }
