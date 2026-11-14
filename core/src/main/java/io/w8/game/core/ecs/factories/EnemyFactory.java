@@ -35,7 +35,7 @@ public class EnemyFactory {
             enemy.health = 15f + difficulty * 2.2f;
             enemy.maxShieldHealth = 25f + difficulty * 2.5f;
             enemy.shieldHealth = enemy.maxShieldHealth;
-            enemy.speed = 88f + difficulty * 3.4f;
+            enemy.speed = 105f + difficulty * 4.2f;
             enemy.contactDamage = 42f + difficulty * 1.8f;
             enemy.radius = 31f;
             enemy.fireInterval = 999f;
