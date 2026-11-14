@@ -101,7 +101,7 @@ public class CombatSystem extends EntitySystem {
                         float sy = affectedTransform.y - shotTransform.y;
                         boolean inBlast = splash > 0f && sx * sx + sy * sy <= splash * splash;
                         if (affected != enemyEntity && !inBlast) continue;
-                        affectedEnemy.health -= projectile.damage;
+                        damageEnemy(affectedEnemy, projectile.damage);
                         if (affectedEnemy.health <= 0f) {
                             remove.add(affected);
                             if (players.size() > 0) {
@@ -150,7 +150,7 @@ public class CombatSystem extends EntitySystem {
                 float radius = enemy.radius + entityRadius(playerEntity, 28f);
                 if (dx * dx + dy * dy <= radius * radius) {
                     damagePlayer(playerEntity, enemy.contactDamage, 0.65f);
-                    enemy.health -= 1f;
+                    damageEnemy(enemy, 1f);
                     factory.createEffect(playerTransform.x, playerTransform.y, 1f, 0.15f, 0.12f, 30f);
                     if (enemy.health <= 0f) {
                         remove.add(enemyEntity);
@@ -165,6 +165,16 @@ public class CombatSystem extends EntitySystem {
         }
 
         for (int i = 0; i < remove.size; i++) engine.removeEntity(remove.get(i));
+    }
+
+    private void damageEnemy(EnemyComponent enemy, float damage) {
+        float remainingDamage = damage;
+        if (enemy.shieldHealth > 0f) {
+            float absorbedDamage = Math.min(enemy.shieldHealth, remainingDamage);
+            enemy.shieldHealth -= absorbedDamage;
+            remainingDamage -= absorbedDamage;
+        }
+        enemy.health = Math.max(0f, enemy.health - remainingDamage);
     }
 
     private float entityRadius(Entity entity, float fallback) {
