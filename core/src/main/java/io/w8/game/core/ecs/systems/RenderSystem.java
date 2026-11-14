@@ -219,8 +219,9 @@ public class RenderSystem extends EntitySystem {
         for (int i = 0; i < enemies.size(); i++) {
             Entity entity = enemies.get(i);
             EnemyComponent enemy = entity.getComponent(EnemyComponent.class);
+            if (enemy.kind == 3) continue;
             TransformComponent transform = entity.getComponent(TransformComponent.class);
-            float width = enemy.kind == 3 ? 86f : enemy.kind == 1 ? 68f : 48f;
+            float width = enemy.kind == 1 ? 68f : 48f;
             float height = 6f;
             float x = transform.x - width * 0.5f;
             float y = transform.y + enemy.radius + 12f;
